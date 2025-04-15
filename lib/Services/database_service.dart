@@ -109,6 +109,7 @@ class DatabaseService {
       existingRecord.calories =
           (double.parse(existingRecord.calories) + calories).toString();
       await saveCalorieCount(existingRecord);
+      print('Updated record: ${existingRecord.toMap()}');
     } else {
       // Create a new record
       final newRecord = CalorieCount(
@@ -126,6 +127,7 @@ class DatabaseService {
         progressWeekly: 0,
       );
       await saveCalorieCount(newRecord);
+      print('Inserted new record: ${newRecord.toMap()}');
     }
   }
 
@@ -139,8 +141,10 @@ class DatabaseService {
     );
 
     if (result.isNotEmpty) {
+      print('Latest Weekly Target: ${result.first['weeklyTarget']}');
       return result.first['weeklyTarget'] as int?;
     }
+    print('No Weekly Target found in the database.');
     return null;
   }
 
@@ -154,8 +158,10 @@ class DatabaseService {
     );
 
     if (result.isNotEmpty) {
+      print('Latest Daily Target: ${result.first['dailyTarget']}');
       return result.first['dailyTarget'] as int?;
     }
+    print('No Daily Target found in the database.');
     return null;
   }
 
@@ -169,8 +175,11 @@ class DatabaseService {
     );
 
     if (result.isNotEmpty) {
-      return double.tryParse(result.first['calories'] as String);
+      final calorieTotal = double.tryParse(result.first['calories'] as String);
+      print('Latest Calorie Total: $calorieTotal');
+      return calorieTotal;
     }
+    print('No Calorie Total found in the database.');
     return null;
   }
 
@@ -185,8 +194,10 @@ class DatabaseService {
     );
 
     if (result.isNotEmpty) {
+      print('Remaining Daily Calories: ${result.first['remainingCaloriesDaily']}');
       return result.first['remainingCaloriesDaily'] as double?;
     }
+    print('No Remaining Daily Calories found in the database.');
     return null;
   }
 
@@ -201,8 +212,10 @@ class DatabaseService {
     );
 
     if (result.isNotEmpty) {
+      print('Remaining Weekly Calories: ${result.first['remainingCaloriesWeekly']}');
       return result.first['remainingCaloriesWeekly'] as double?;
     }
+    print('No Remaining Weekly Calories found in the database.');
     return null;
   }
 
@@ -217,8 +230,10 @@ class DatabaseService {
     );
 
     if (result.isNotEmpty) {
+      print('Daily Progress: ${result.first['progressDaily']}');
       return result.first['progressDaily'] as double?;
     }
+    print('No Daily Progress found in the database.');
     return null;
   }
 
@@ -233,8 +248,10 @@ class DatabaseService {
     );
 
     if (result.isNotEmpty) {
+      print('Weekly Progress: ${result.first['progressWeekly']}');
       return result.first['progressWeekly'] as double?;
     }
+    print('No Weekly Progress found in the database.');
     return null;
   }
 }

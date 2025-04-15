@@ -81,7 +81,7 @@ class NutritionPage extends StatelessWidget {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: productProvider.products.length,
+                itemCount: productProvider.topProducts.length,
                 itemBuilder: (context, index) {
                   final product = productProvider.products[index];
                   debugPrint('Search Results${product.productName}');

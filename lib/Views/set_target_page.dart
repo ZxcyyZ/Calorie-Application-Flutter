@@ -1,24 +1,164 @@
+import 'package:firstflutterapp/Services/database_service.dart';
 import 'package:flutter/material.dart';
 
-class SetTargetPage extends StatelessWidget {
+class SetTargetPage extends StatefulWidget {
   const SetTargetPage({super.key});
+
+  @override
+  State<SetTargetPage> createState() => _SetTargetPageState();
+}
+
+class _SetTargetPageState extends State<SetTargetPage> {
+  final TextEditingController ageController = TextEditingController();
+  final TextEditingController heightController = TextEditingController();
+  final TextEditingController weightController = TextEditingController();
+  String selectedGender = 'Male'; // Default gender selection
+
+  // Mock database save function (replace with your actual database logic)
+  Future<void> saveToDatabase(int DailyTarget, int WeeklyTarget) async {
+    try {
+      // Import the database service
+      final DatabaseService dbService = DatabaseService();
+
+      final now = DateTime.now();
+      final dayOfWeek = now.weekday.toString();
+      // Save or update the calorie targets using the database service
+      await dbService.saveOrUpdateCalories(
+        name: 'Calorie Targets', // Name for the record
+        calories: 0, // No calories to save for targets
+        day: now.day,
+        month: now.month,
+        dayOfWeek: dayOfWeek,
+        weeklyTarget: WeeklyTarget,
+        dailyTarget: DailyTarget,
+      );
+     // Debug lines to display the saved targets
+      debugPrint('Daily Target Saved: $DailyTarget kcal');
+      debugPrint('Weekly Target Saved: $WeeklyTarget kcal');
+
+       final savedData = await dbService.getLatestDailyTarget(); // Replace with your actual database fetch method
+       final savedWeeklyData = await dbService.getLatestWeeklyTarget(); // Replace with your actual database fetch method
+    // Display the fetched data in the debug console
+    if (savedData != null) {
+      debugPrint('Fetched Data from Database:');
+      debugPrint('Daily Target: ${savedData} kcal');
+      debugPrint('Weekly Target: ${savedWeeklyData} kcal');
+    } else {
+      debugPrint('No data found in the database.');
+    }
+
+      debugPrint('Saved successfully to the database!');
+    } catch (e) {
+      debugPrint('Error saving to the database: $e');
+    }
+  }
+
+  void calculateCalorieTarget() async {
+    final ageText = ageController.text;
+    final heightText = heightController.text;
+    final weightText = weightController.text;
+
+    // Validate inputs
+    if (ageText.isEmpty || heightText.isEmpty || weightText.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: const Text('Please fill in all fields.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final age = int.tryParse(ageText);
+    final height = double.tryParse(heightText);
+    final weight = double.tryParse(weightText);
+
+    if (age == null || height == null || weight == null) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: const Text('Please enter valid numeric values for age, height, and weight.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (age <= 0 || height <= 0 || weight <= 0) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: const Text('Age, height, and weight must be greater than zero.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Calculate BMR using the provided formulas
+    double bmr;
+    if (selectedGender == 'Male') {
+      bmr = 66.5 + (13.75 * weight) + (5.003 * height) - (6.75 * age);
+    } else {
+      bmr = 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
+    }
+
+    final DailyTarget = (bmr * 1.2).round(); // Assuming sedentary activity level
+    final WeeklyTarget = DailyTarget * 7;
+
+    // Save the targets to the database
+    await saveToDatabase(DailyTarget, WeeklyTarget);
+
+    
+
+    // Show success dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Calorie Target'),
+        content: Text(
+          'Based on your inputs:\n'
+          'Daily Calorie Target: $DailyTarget kcal\n'
+          'Weekly Calorie Target: $WeeklyTarget kcal\n\n'
+          'Your targets have been saved successfully!',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: Row(
-          children: [
-            const SizedBox(width: 10),
-            const Text(
-              'Target Set',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+        title: const Text(
+          'Set Target',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
       body: SingleChildScrollView(
@@ -27,147 +167,102 @@ class SetTargetPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Instruction Label
               const Text(
-                'Below are options to set your Daily and Weekly calorie Targets, which will apply to your calorie pages.',
+                'Enter your details below to calculate your daily and weekly calorie targets.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+
+              // Gender Dropdown
+              const Text(
+                'Gender',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                value: selectedGender,
+                items: const [
+                  DropdownMenuItem(value: 'Male', child: Text('Male')),
+                  DropdownMenuItem(value: 'Female', child: Text('Female')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      selectedGender = value;
+                    });
+                  }
+                },
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Daily Target Section
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Set your Daily Calorie Target',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Setting your daily target will update your weekly target as the application will multiply this value by 7.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Enter your Daily Target',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 15, vertical: 10),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Add logic to set daily target
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          'Set Target',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              // Age Input
+              const Text(
+                'Age (years)',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-
-              // Weekly Target Section
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+              const SizedBox(height: 10),
+              TextField(
+                controller: ageController,
+                decoration: InputDecoration(
+                  hintText: 'Enter your age',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 ),
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Set your Weekly Calorie Target',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Setting your weekly target will also calculate your daily target by dividing by 7. If the value is not divisible or results below 1500, it will not be accepted.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Enter your Weekly Target',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 15, vertical: 10),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Add logic to set weekly target
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          'Set Target',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 20),
+
+              // Height Input
+              const Text(
+                'Height (cm)',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: heightController,
+                decoration: InputDecoration(
+                  hintText: 'Enter your height in cm',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 20),
+
+              // Weight Input
+              const Text(
+                'Weight (kg)',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: weightController,
+                decoration: InputDecoration(
+                  hintText: 'Enter your weight in kg',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 20),
+
+              // Calculate Button
+              Center(
+                child: ElevatedButton(
+                  onPressed: calculateCalorieTarget,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text(
+                    'Calculate Target',
+                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -180,12 +275,12 @@ class SetTargetPage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // Back Button
+            // Home Button
             IconButton(
-              icon: const Icon(Icons.arrow_back, size: 40),
+              icon: const Icon(Icons.home, size: 40),
               color: Colors.white,
               onPressed: () {
-                Navigator.pop(context); // Navigate back to the previous page
+                Navigator.pushNamed(context, '/homePage'); // Navigate to the home page
               },
             ),
             // Barcode Scanner Button
@@ -193,7 +288,7 @@ class SetTargetPage extends StatelessWidget {
               icon: const Icon(Icons.qr_code_scanner, size: 40),
               color: Colors.orange,
               onPressed: () {
-                Navigator.pushNamed(context, '/barcodePage'); // Navigate to barcode scanner page
+                Navigator.pushNamed(context, '/barcodePage'); // Navigate to the barcode scanner page
               },
             ),
             // Settings Button
@@ -201,7 +296,7 @@ class SetTargetPage extends StatelessWidget {
               icon: const Icon(Icons.settings, size: 40),
               color: Colors.white,
               onPressed: () {
-                Navigator.pushNamed(context, '/settingsPage'); // Navigate to settings page
+                Navigator.pushNamed(context, '/settingsPage'); // Navigate to the settings page
               },
             ),
           ],
