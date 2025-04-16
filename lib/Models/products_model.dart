@@ -36,6 +36,9 @@ class FoodAPI {
   @JsonKey(name: 'nutriments')
   Nutriments? nutriments;
 
+  @JsonKey(name: 'categories', fromJson: _categoriesFromJson, toJson: _categoriesToJson)
+  List<String>? categories;
+
   @JsonKey(name: 'image_nutrition_url')
   String? imageNutritionUrl;
 
@@ -45,6 +48,7 @@ class FoodAPI {
   FoodAPI({
     this.productName,
     this.nutriments,
+    this.categories,
     this.imageNutritionUrl,
     this.imageUrl,
   });
@@ -54,27 +58,42 @@ class FoodAPI {
   Map<String, dynamic> toJson() => _$FoodAPIToJson(this);
 }
 
+// Helper functions to handle the conversion of categories
+List<String> _categoriesFromJson(dynamic categories) {
+  if (categories == null || categories is! String || categories.isEmpty) {
+    return [];
+  }
+  return categories.split(',').map((category) => category.trim()).toList();
+}
+
+String? _categoriesToJson(List<String>? categories) {
+  if (categories == null || categories.isEmpty) {
+    return null;
+  }
+  return categories.join(',');
+}
+
 @JsonSerializable()
 class Nutriments {
-  @JsonKey(name: 'salt')
+  @JsonKey(name: 'salt', fromJson: _parseDouble)
   double? salt;
 
-  @JsonKey(name: 'fat')
+  @JsonKey(name: 'fat', fromJson: _parseDouble)
   double? fat;
 
-  @JsonKey(name: 'saturated-fat')
+  @JsonKey(name: 'saturated-fat', fromJson: _parseDouble)
   double? saturatedFat;
 
-  @JsonKey(name: 'sugars')
+  @JsonKey(name: 'sugars', fromJson: _parseDouble)
   double? sugars;
 
-  @JsonKey(name: 'energy-kcal')
+  @JsonKey(name: 'energy-kcal', fromJson: _parseDouble)
   double? energy;
 
-  @JsonKey(name: 'energy-kcal_serving')
+  @JsonKey(name: 'energy-kcal_serving', fromJson: _parseDouble)
   double? energyServe;
 
-  @JsonKey(name: 'proteins_100g')
+  @JsonKey(name: 'proteins_100g', fromJson: _parseDouble)
   double? proteinsServe;
 
   Nutriments({
@@ -91,4 +110,14 @@ class Nutriments {
       _$NutrimentsFromJson(json);
 
   Map<String, dynamic> toJson() => _$NutrimentsToJson(this);
+}
+
+// Helper function to safely parse numeric fields
+double? _parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  if (value is String) {
+    return double.tryParse(value);
+  }
+  return null;
 }

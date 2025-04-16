@@ -82,4 +82,64 @@ class ProductApiProvider with ChangeNotifier {
 
   /// Get the top 8 products
   List<FoodAPI> get topProducts => products.take(8).toList();
+
+  /// Filter products by name and category
+  Future<void> filterProductsByInfo(String query, String category) async {
+    if (query.isEmpty || category.isEmpty) return;
+
+    isBusy = true;
+    try {
+      debugPrint('Filtering products with query: $query and category: $category');
+      final filteredProducts = await _apiService.filterProductsByInfo(query, category);
+      if (filteredProducts != null) {
+        products = filteredProducts;
+        debugPrint('Filtered products found: ${filteredProducts.length}');
+      } else {
+        debugPrint('No filtered products found.');
+      }
+    } catch (e) {
+      debugPrint('Error filtering products: $e');
+    } finally {
+      isBusy = false;
+    }
+  }
+
+  FoodAPI? findBetterAlternative(FoodAPI selectedProduct) {
+  if (products.isEmpty) {
+    debugPrint('No products available to compare.');
+    return null;
+  }
+
+  double selectedCalories = selectedProduct.nutriments?.energy ?? double.infinity;
+
+  // Sort products by calories in ascending order
+  products.sort((a, b) {
+    double aCalories = a.nutriments?.energy ?? double.infinity;
+    double bCalories = b.nutriments?.energy ?? double.infinity;
+    return aCalories.compareTo(bCalories);
+  });
+
+  for (var product in products) {
+    // Skip the selected product itself
+    if (product.productName == selectedProduct.productName) continue;
+
+    double productCalories = product.nutriments?.energy ?? double.infinity;
+
+    // Check if the product has lower calories
+    if (productCalories < selectedCalories) {
+      // Check if at least one other property is lower
+      if ((product.nutriments?.salt ?? double.infinity) < (selectedProduct.nutriments?.salt ?? double.infinity) ||
+          (product.nutriments?.sugars ?? double.infinity) < (selectedProduct.nutriments?.sugars ?? double.infinity) ||
+          (product.nutriments?.proteinsServe ?? double.infinity) < (selectedProduct.nutriments?.proteinsServe ?? double.infinity) ||
+          (product.nutriments?.fat ?? double.infinity) < (selectedProduct.nutriments?.fat ?? double.infinity) ||
+          (product.nutriments?.saturatedFat ?? double.infinity) < (selectedProduct.nutriments?.saturatedFat ?? double.infinity)) {
+        debugPrint('Better alternative found: ${product.productName}');
+        return product; // Return immediately if a better alternative is found
+      }
+    }
+  }
+
+  debugPrint('No better alternative found.');
+  return null;
+}
 }

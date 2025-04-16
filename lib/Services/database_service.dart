@@ -93,6 +93,8 @@ class DatabaseService {
     required String dayOfWeek,
     required int weeklyTarget,
     required int dailyTarget,
+    required int remainingCaloriesDaily,
+    required int remainingCaloriesWeekly,
   }) async {
     final db = await database;
 
@@ -121,8 +123,8 @@ class DatabaseService {
         weeklyTarget: weeklyTarget,
         dailyTarget: dailyTarget,
         calorieTotals: 0,
-        remainingCaloriesDaily: 0,
-        remainingCaloriesWeekly: 0,
+        remainingCaloriesDaily: remainingCaloriesDaily.toDouble(),
+        remainingCaloriesWeekly: remainingCaloriesWeekly.toDouble(),
         progressDaily: 0,
         progressWeekly: 0,
       );

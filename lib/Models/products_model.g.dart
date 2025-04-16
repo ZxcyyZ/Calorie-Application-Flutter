@@ -32,6 +32,7 @@ FoodAPI _$FoodAPIFromJson(Map<String, dynamic> json) => FoodAPI(
       json['nutriments'] == null
           ? null
           : Nutriments.fromJson(json['nutriments'] as Map<String, dynamic>),
+  categories: _categoriesFromJson(json['categories']),
   imageNutritionUrl: json['image_nutrition_url'] as String?,
   imageUrl: json['image_url'] as String?,
 );
@@ -39,18 +40,19 @@ FoodAPI _$FoodAPIFromJson(Map<String, dynamic> json) => FoodAPI(
 Map<String, dynamic> _$FoodAPIToJson(FoodAPI instance) => <String, dynamic>{
   'product_name': instance.productName,
   'nutriments': instance.nutriments,
+  'categories': _categoriesToJson(instance.categories),
   'image_nutrition_url': instance.imageNutritionUrl,
   'image_url': instance.imageUrl,
 };
 
 Nutriments _$NutrimentsFromJson(Map<String, dynamic> json) => Nutriments(
-  salt: (json['salt'] as num?)?.toDouble(),
-  fat: (json['fat'] as num?)?.toDouble(),
-  saturatedFat: (json['saturated-fat'] as num?)?.toDouble(),
-  sugars: (json['sugars'] as num?)?.toDouble(),
-  energy: (json['energy-kcal'] as num?)?.toDouble(),
-  energyServe: (json['energy-kcal_serving'] as num?)?.toDouble(),
-  proteinsServe: (json['proteins_100g'] as num?)?.toDouble(),
+  salt: _parseDouble(json['salt']),
+  fat: _parseDouble(json['fat']),
+  saturatedFat: _parseDouble(json['saturated-fat']),
+  sugars: _parseDouble(json['sugars']),
+  energy: _parseDouble(json['energy-kcal']),
+  energyServe: _parseDouble(json['energy-kcal_serving']),
+  proteinsServe: _parseDouble(json['proteins_100g']),
 );
 
 Map<String, dynamic> _$NutrimentsToJson(Nutriments instance) =>

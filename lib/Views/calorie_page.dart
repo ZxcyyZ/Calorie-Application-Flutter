@@ -1,3 +1,4 @@
+import 'package:firstflutterapp/Models/database_model.dart';
 import 'package:firstflutterapp/Services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -31,7 +32,6 @@ class CaloriePage extends StatelessWidget {
         body: Consumer<CalorieCountProvider>(
           builder: (context, provider, child) {
             final dailyGoal = provider.dailyTarget;
-            debugPrint('Daily Goal: $dailyGoal');
             final dailyRemaining = provider.remainingCaloriesDaily;
             final weeklyGoal = provider.weeklyTarget;
             final weeklyRemaining = provider.remainingCaloriesWeekly;
@@ -95,7 +95,7 @@ class CaloriePage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10), // Reduced spacing between the two boxes
+                    const SizedBox(height: 20),
 
                     // Weekly Calories Box
                     Card(
@@ -151,17 +151,11 @@ class CaloriePage extends StatelessWidget {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            final dbservice = DatabaseService();
-                            dbservice.clearCalorieCounts();
-                            debugPrint('Database cleared');
-
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const SetTargetPage()),
-                            );
+                            provider.clearCalorieCountsAsync();
+                            debugPrint('Calorie counts cleared.');
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
+                            backgroundColor: Colors.blue,
                             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
@@ -178,7 +172,7 @@ class CaloriePage extends StatelessWidget {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
+                            backgroundColor: Colors.blue,
                             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
@@ -188,6 +182,101 @@ class CaloriePage extends StatelessWidget {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // ListView for Today's Tracked Calories
+                    const Text(
+                      'Today\'s Tracked Calories',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    if (provider.calorieTotal == 0)
+                      const Center(
+                        child: Text(
+                          'No calories tracked for today.',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      )
+                    else
+                      FutureBuilder<List<CalorieCount>>(
+                        future: DatabaseService().getCalorieCounts(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                'No calories tracked for today.',
+                                style: TextStyle(fontSize: 16, color: Colors.grey),
+                              ),
+                            );
+                          }
+
+                          final calorieEntries = snapshot.data!;
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: calorieEntries.length,
+                            itemBuilder: (context, index) {
+                              final entry = calorieEntries[index];
+                              return Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                margin: const EdgeInsets.symmetric(vertical: 5),
+                                child: ListTile(
+                                  title: Text(
+                                    entry.name ?? 'Unknown Product',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    '${entry.calories ?? 0} kcal',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    const SizedBox(height: 20),
+
+                    // Calendar Icon Button
+                    IconButton(
+                      onPressed: () async {
+                        final selectedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+
+                        if (selectedDate != null) {
+                          debugPrint('Selected Date: ${selectedDate.toIso8601String()}');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Selected Date: ${selectedDate.toLocal()}'),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.calendar_today, size: 40, color: Colors.white),
+                      tooltip: 'Pick a Date',
                     ),
                   ],
                 ),
@@ -200,20 +289,18 @@ class CaloriePage extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Home Button
               IconButton(
                 icon: const Icon(Icons.home, size: 40),
                 color: Colors.white,
                 onPressed: () {
-                  Navigator.pop(context); // Navigate back to the home page
+                  Navigator.pop(context);
                 },
               ),
-              // Settings Button
               IconButton(
                 icon: const Icon(Icons.settings, size: 40),
                 color: Colors.white,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/settingsPage'); // Navigate to the settings page
+                  Navigator.pushNamed(context, '/settingsPage');
                 },
               ),
             ],

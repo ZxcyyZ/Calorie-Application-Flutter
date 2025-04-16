@@ -14,14 +14,15 @@ class _SetTargetPageState extends State<SetTargetPage> {
   final TextEditingController weightController = TextEditingController();
   String selectedGender = 'Male'; // Default gender selection
 
-  // Mock database save function (replace with your actual database logic)
-  Future<void> saveToDatabase(int DailyTarget, int WeeklyTarget) async {
+  // Save to database with daily and weekly remaining calories
+  Future<void> saveToDatabase(int dailyTarget, int weeklyTarget) async {
     try {
       // Import the database service
       final DatabaseService dbService = DatabaseService();
 
       final now = DateTime.now();
       final dayOfWeek = now.weekday.toString();
+
       // Save or update the calorie targets using the database service
       await dbService.saveOrUpdateCalories(
         name: 'Calorie Targets', // Name for the record
@@ -29,23 +30,29 @@ class _SetTargetPageState extends State<SetTargetPage> {
         day: now.day,
         month: now.month,
         dayOfWeek: dayOfWeek,
-        weeklyTarget: WeeklyTarget,
-        dailyTarget: DailyTarget,
+        weeklyTarget: weeklyTarget,
+        dailyTarget: dailyTarget,
+        remainingCaloriesDaily: dailyTarget, // Set daily remaining to match daily target
+        remainingCaloriesWeekly: weeklyTarget, // Set weekly remaining to match weekly target
       );
-     // Debug lines to display the saved targets
-      debugPrint('Daily Target Saved: $DailyTarget kcal');
-      debugPrint('Weekly Target Saved: $WeeklyTarget kcal');
 
-       final savedData = await dbService.getLatestDailyTarget(); // Replace with your actual database fetch method
-       final savedWeeklyData = await dbService.getLatestWeeklyTarget(); // Replace with your actual database fetch method
-    // Display the fetched data in the debug console
-    if (savedData != null) {
-      debugPrint('Fetched Data from Database:');
-      debugPrint('Daily Target: ${savedData} kcal');
-      debugPrint('Weekly Target: ${savedWeeklyData} kcal');
-    } else {
-      debugPrint('No data found in the database.');
-    }
+      // Debug lines to display the saved targets
+      debugPrint('Daily Target Saved: $dailyTarget kcal');
+      debugPrint('Weekly Target Saved: $weeklyTarget kcal');
+      debugPrint('Daily Remaining Saved: $dailyTarget kcal');
+      debugPrint('Weekly Remaining Saved: $weeklyTarget kcal');
+
+      final savedData = await dbService.getLatestDailyTarget(); // Replace with your actual database fetch method
+      final savedWeeklyData = await dbService.getLatestWeeklyTarget(); // Replace with your actual database fetch method
+
+      // Display the fetched data in the debug console
+      if (savedData != null) {
+        debugPrint('Fetched Data from Database:');
+        debugPrint('Daily Target: ${savedData} kcal');
+        debugPrint('Weekly Target: ${savedWeeklyData} kcal');
+      } else {
+        debugPrint('No data found in the database.');
+      }
 
       debugPrint('Saved successfully to the database!');
     } catch (e) {
@@ -122,13 +129,11 @@ class _SetTargetPageState extends State<SetTargetPage> {
       bmr = 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
     }
 
-    final DailyTarget = (bmr * 1.2).round(); // Assuming sedentary activity level
-    final WeeklyTarget = DailyTarget * 7;
+    final dailyTarget = (bmr * 1.2).round(); // Assuming sedentary activity level
+    final weeklyTarget = dailyTarget * 7;
 
     // Save the targets to the database
-    await saveToDatabase(DailyTarget, WeeklyTarget);
-
-    
+    await saveToDatabase(dailyTarget, weeklyTarget);
 
     // Show success dialog
     showDialog(
@@ -137,8 +142,8 @@ class _SetTargetPageState extends State<SetTargetPage> {
         title: const Text('Calorie Target'),
         content: Text(
           'Based on your inputs:\n'
-          'Daily Calorie Target: $DailyTarget kcal\n'
-          'Weekly Calorie Target: $WeeklyTarget kcal\n\n'
+          'Daily Calorie Target: $dailyTarget kcal\n'
+          'Weekly Calorie Target: $weeklyTarget kcal\n\n'
           'Your targets have been saved successfully!',
         ),
         actions: [

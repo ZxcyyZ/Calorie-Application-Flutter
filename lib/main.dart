@@ -1,3 +1,4 @@
+import 'package:firstflutterapp/Views/alternative_products_page.dart';
 import 'package:firstflutterapp/Views/barcode_page.dart';
 import 'package:firstflutterapp/Views/nutrition_page.dart';
 import 'package:firstflutterapp/Views/set_calories_page.dart';
@@ -6,6 +7,7 @@ import 'package:firstflutterapp/Views/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'provider/calorie_count_provider.dart';
+import 'provider/product_api_provider.dart';
 import 'provider/settings_provider.dart';
 import 'views/main_page.dart';
 import 'views/calorie_page.dart';
@@ -24,6 +26,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => CalorieCountProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => ProductApiProvider()),
       ],
       child: MaterialApp(
         title: 'NutriTrack',

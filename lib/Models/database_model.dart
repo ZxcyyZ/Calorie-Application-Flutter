@@ -9,7 +9,7 @@ class CalorieCount {
   String dayOfWeek; // Field for the day (e.g., Monday, Tuesday, etc.)
   int weeklyTarget; // Field for the weekly target
   int dailyTarget; // Field for the daily target
-  int calorieTotals; // Field for the total calories
+  double calorieTotals; // Field for the total calories
   double remainingCaloriesDaily; // Field for the remaining daily calories
   double remainingCaloriesWeekly; // Field for the remaining weekly calories
   double progressDaily; // Field for the daily progress

@@ -59,4 +59,40 @@ class ApiService {
     }
     return null;
   }
+
+  /// Filter products by name and category
+Future<List<FoodAPI>?> filterProductsByInfo(String productName, String category) async {
+  int retryCount = 0;
+  const maxRetries = 3;
+  const retryDelay = Duration(seconds: 2);
+
+  while (retryCount < maxRetries) {
+    try {
+      final url = Uri.parse(
+          'https://world.openfoodfacts.org/cgi/search.pl?search_terms=${productName}&tagtype_0=countries&tag_contains_0=contains&tag_0=united%20kingdom&tagtype_1=categories&tag_contains_1=contains&tag_1=${category}&search_simple=1&json=1');
+      final response = await _httpClient.get(url);
+
+      if (response.statusCode == 200) {
+        final searchResult = json.decode(response.body);
+        if (searchResult['products'] != null) {
+          return (searchResult['products'] as List)
+              .map((product) => FoodAPI.fromJson(product))
+              .toList();
+        }
+      } else if (response.statusCode == 504) {
+        print('504 Gateway Timeout. Retrying...');
+      } else {
+        print('Failed to filter products. Status code: ${response.statusCode}');
+        break;
+      }
+    } catch (e) {
+      print('Error filtering products: $e');
+    }
+
+    retryCount++;
+    await Future.delayed(retryDelay);
+  }
+
+  return null;
+}
 }

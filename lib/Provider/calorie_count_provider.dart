@@ -30,7 +30,7 @@ Future<void> loadTodayCalorieCountsAsync() async {
     // Safely parse the calorie values and calculate the total
     _calorieTotal = todayCalorieCounts.fold(0, (sum, item) {
       try {
-        return sum + int.parse(item.calories);
+        return sum + int.parse(item.calories); 
       } catch (e) {
         debugPrint('Invalid calorie value: ${item.calories}');
         return sum; // Skip invalid values
@@ -75,25 +75,7 @@ Future<void> loadTodayCalorieCountsAsync() async {
     }
   }
 
-  // Method to save or update calorie targets
-  Future<void> saveOrUpdateTargets(int dailyTarget, int weeklyTarget) async {
-    try {
-      final now = DateTime.now();
-      await DatabaseService().saveOrUpdateCalories(
-        name: 'Calorie Targets',
-        calories: 0,
-        day: now.day,
-        month: now.month,
-        dayOfWeek: now.weekday.toString(),
-        weeklyTarget: weeklyTarget,
-        dailyTarget: dailyTarget,
-      );
-      debugPrint('Targets saved successfully!');
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error saving targets: $e');
-    }
-  }
+
 
   // Method to increment calories
   void incrementCalories(int amount) {
