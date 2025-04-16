@@ -1,6 +1,6 @@
-# firstflutterapp
+# Creative Piece Dissertation
 
-A new Flutter project.
+Calorie Tracking Application - Following Data Science Themes for dissertation project
 
 ## Getting Started
 
