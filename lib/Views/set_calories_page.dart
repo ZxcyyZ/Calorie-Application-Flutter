@@ -320,22 +320,20 @@ class SetCaloriesPage extends StatelessWidget {
 
   void addCalories(BuildContext context, dynamic product, CalorieCountProvider calorieCountProvider) async {
   // Retrieve calorie data
-  String calories = "0";
+  double calories = 0.0;
   if (product.nutriments != null) {
     if ((product.nutriments?.energyServe ?? 0) > 0) {
-      calories = product.nutriments!.energyServe!.toString();
+      calories = product.nutriments!.energyServe!;
     } else {
-      calories = product.nutriments?.energy?.toString() ?? "0";
+      calories = product.nutriments?.energy ?? 0.0;
     }
   }
 
   // Fetch missing variables from the provider
   await calorieCountProvider.loadTargetsAsync();
-  double newCalorieTotal = (calorieCountProvider.calorieTotal ?? 0.0).toDouble();
+  double newCalorieTotal = calorieCountProvider.calorieTotal ?? 0.0;
 
-  // Parse the calories and add to the total
-  final newCalories = double.tryParse(calories) ?? 0.0;
-  newCalorieTotal += newCalories;
+  newCalorieTotal += calories;
 
   // Update daily and weekly targets if available
   int newDailyTarget = calorieCountProvider.dailyTarget ?? 0;

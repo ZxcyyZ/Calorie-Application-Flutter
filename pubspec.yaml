@@ -38,6 +38,7 @@ dependencies:
   zxing_scanner: ^1.0.0
   flutter_zxing: ^1.8.2
   sqflite: ^2.4.2
+  path: ^1.8.0
   json_annotation: ^4.9.0
 
 dev_dependencies:

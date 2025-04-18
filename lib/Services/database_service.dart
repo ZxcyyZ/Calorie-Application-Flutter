@@ -10,6 +10,9 @@ class DatabaseService {
 
   Database? _database;
 
+  static const int _databaseVersion = 2; // Increment this version for schema updates
+  static const String _databaseName = 'calorie_tracker.db';
+
   /// Initialize the database
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -20,23 +23,24 @@ class DatabaseService {
   /// Create and open the database
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'caloriecount.db');
+    final path = join(dbPath, _databaseName);
 
     return await openDatabase(
       path,
-      version: 1,
+      version: _databaseVersion,
       onCreate: (db, version) async {
+        // Initial table creation
         await db.execute('''
           CREATE TABLE CalorieCount (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
-            calories TEXT,
+            calories REAL,
             month INTEGER,
             date INTEGER,
             dayOfWeek TEXT,
             weeklyTarget INTEGER,
             dailyTarget INTEGER,
-            calorieTotals INTEGER,
+            calorieTotals REAL,
             remainingCaloriesDaily REAL,
             remainingCaloriesWeekly REAL,
             progressDaily REAL,
@@ -44,20 +48,60 @@ class DatabaseService {
           )
         ''');
       },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE CalorieCount RENAME TO CalorieCount_old');
+
+          await db.execute('''
+            CREATE TABLE CalorieCount (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT,
+              calories REAL,
+              month INTEGER,
+              date INTEGER,
+              dayOfWeek TEXT,
+              weeklyTarget INTEGER,
+              dailyTarget INTEGER,
+              calorieTotals REAL,
+              remainingCaloriesDaily REAL,
+              remainingCaloriesWeekly REAL,
+              progressDaily REAL,
+              progressWeekly REAL
+            )
+          ''');
+
+          await db.execute('''
+            INSERT INTO CalorieCount (id, name, calories, month, date, dayOfWeek, weeklyTarget, dailyTarget, calorieTotals, remainingCaloriesDaily, remainingCaloriesWeekly, progressDaily, progressWeekly)
+            SELECT id, name, CAST(calories AS REAL), month, date, dayOfWeek, weeklyTarget, dailyTarget, CAST(calorieTotals AS REAL), CAST(remainingCaloriesDaily AS REAL), CAST(remainingCaloriesWeekly AS REAL), CAST(progressDaily AS REAL), CAST(progressWeekly AS REAL)
+            FROM CalorieCount_old
+          ''');
+
+          await db.execute('DROP TABLE CalorieCount_old');
+        }
+      },
     );
   }
 
   /// Retrieve calorie counts for the current day and month
-  Future<List<CalorieCount>> getCalorieCounts() async {
+  Future<CalorieCount?> getCalorieCounts() async {
     final db = await database;
     final today = DateTime.now();
-    final maps = await db.query(
+
+    // Query the database for a record matching today's date and month
+    final result = await db.query(
       'CalorieCount',
       where: 'date = ? AND month = ?',
       whereArgs: [today.day, today.month],
+      limit: 1, // Limit to one result
     );
 
-    return maps.map((map) => CalorieCount.fromMap(map)).toList();
+    if (result.isNotEmpty) {
+      // Map the result to a CalorieCount object
+      return CalorieCount.fromMap(result.first);
+    }
+
+    print('No calorie record found for today (${today.day}/${today.month}).');
+    return null; // Return null if no record is found
   }
 
   /// Save or update a CalorieCount record
@@ -84,17 +128,17 @@ class DatabaseService {
     await db.delete('CalorieCount');
   }
 
-  /// Save or update calories for a specific date
   Future<void> saveOrUpdateCalories({
     required String name,
     required double calories,
+    required double caloriesTotals,
     required int day,
     required int month,
     required String dayOfWeek,
     required int weeklyTarget,
     required int dailyTarget,
-    required int remainingCaloriesDaily,
-    required int remainingCaloriesWeekly,
+    required double remainingCaloriesDaily,
+    required double remainingCaloriesWeekly,
   }) async {
     final db = await database;
 
@@ -108,23 +152,22 @@ class DatabaseService {
     if (existingRecords.isNotEmpty) {
       // Update the existing record
       final existingRecord = CalorieCount.fromMap(existingRecords.first);
-      existingRecord.calories =
-          (double.parse(existingRecord.calories) + calories).toString();
+      existingRecord.calories = (existingRecord.calories) + calories; // Ensure this remains a double
       await saveCalorieCount(existingRecord);
       print('Updated record: ${existingRecord.toMap()}');
     } else {
       // Create a new record
       final newRecord = CalorieCount(
         name: name,
-        calories: calories.toString(),
+        calories: calories, // Ensure this is a double
         date: day,
         month: month,
         dayOfWeek: dayOfWeek,
         weeklyTarget: weeklyTarget,
         dailyTarget: dailyTarget,
-        calorieTotals: 0,
-        remainingCaloriesDaily: remainingCaloriesDaily.toDouble(),
-        remainingCaloriesWeekly: remainingCaloriesWeekly.toDouble(),
+        calorieTotals: caloriesTotals,
+        remainingCaloriesDaily: remainingCaloriesDaily,
+        remainingCaloriesWeekly: remainingCaloriesWeekly,
         progressDaily: 0,
         progressWeekly: 0,
       );
@@ -255,5 +298,24 @@ class DatabaseService {
     }
     print('No Weekly Progress found in the database.');
     return null;
+  }
+
+  /// Retrieve the latest calorie value
+  Future<double?> getLatestCalories() async {
+    final db = await database;
+    final result = await db.query(
+      'CalorieCount',
+      orderBy: 'id DESC', // Get the most recent entry
+      limit: 1, // Limit to one result
+    );
+
+    if (result.isNotEmpty) {
+      final latestCalories = double.tryParse(result.first['calories'] as String);
+      print('Latest Calories: $latestCalories');
+      return latestCalories;
+    }
+
+    print('No calorie data found in the database.');
+    return null; // Return null if no data is found
   }
 }

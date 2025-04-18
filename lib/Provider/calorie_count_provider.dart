@@ -6,36 +6,40 @@ class CalorieCountProvider extends ChangeNotifier {
   // Private fields for storing property values
   int _weeklyTarget = 0;
   int _dailyTarget = 0;
-  int _calorieTotal = 0;
+  double _calorieTotal = 0;
   double _remainingCaloriesDaily = 0;
   double _remainingCaloriesWeekly = 0;
   double _dailyProgressValue = 0;
   double _weeklyProgressValue = 0;
+  List<CalorieCount> _todayCalorieCounts = [];
 
   // Getters for accessing the properties
   int get weeklyTarget => _weeklyTarget;
   int get dailyTarget => _dailyTarget;
-  int get calorieTotal => _calorieTotal;
+  double get calorieTotal => _calorieTotal;
   double get remainingCaloriesDaily => _remainingCaloriesDaily;
   double get remainingCaloriesWeekly => _remainingCaloriesWeekly;
   double get dailyProgressValue => _dailyProgressValue;
   double get weeklyProgressValue => _weeklyProgressValue;
+  List<CalorieCount> get todayCalorieCounts => _todayCalorieCounts; 
 
   // Method to load today's calorie counts
 Future<void> loadTodayCalorieCountsAsync() async {
   try {
-    // Fetch today's calorie counts from the database
     final todayCalorieCounts = await DatabaseService().getCalorieCounts();
 
-    // Safely parse the calorie values and calculate the total
-    _calorieTotal = todayCalorieCounts.fold(0, (sum, item) {
-      try {
-        return sum + int.parse(item.calories); 
-      } catch (e) {
-        debugPrint('Invalid calorie value: ${item.calories}');
-        return sum; // Skip invalid values
-      }
-    });
+    if (todayCalorieCounts != null) {
+      _todayCalorieCounts = [todayCalorieCounts]; // Store the fetched data as a list
+
+      // Safely sum the calorie values
+      _calorieTotal = _todayCalorieCounts.fold(0.0, (double sum, item) {
+        return sum + item.calories; // item.calories is already a double
+      });
+    } else {
+      // If no data is found, reset the values
+      _todayCalorieCounts = [];
+      _calorieTotal = 0.0;
+    }
 
     notifyListeners();
   } catch (e) {

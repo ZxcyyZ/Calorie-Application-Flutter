@@ -26,14 +26,15 @@ class _SetTargetPageState extends State<SetTargetPage> {
       // Save or update the calorie targets using the database service
       await dbService.saveOrUpdateCalories(
         name: 'Calorie Targets', // Name for the record
-        calories: 0, // No calories to save for targets
+        calories: 0.0, // No calories to save for targets
+        caloriesTotals: 0.0,
         day: now.day,
         month: now.month,
         dayOfWeek: dayOfWeek,
         weeklyTarget: weeklyTarget,
         dailyTarget: dailyTarget,
-        remainingCaloriesDaily: dailyTarget, // Set daily remaining to match daily target
-        remainingCaloriesWeekly: weeklyTarget, // Set weekly remaining to match weekly target
+        remainingCaloriesDaily: dailyTarget.toDouble(), // Set daily remaining to match daily target
+        remainingCaloriesWeekly: weeklyTarget.toDouble(), // Set weekly remaining to match weekly target
       );
 
       // Debug lines to display the saved targets
@@ -285,7 +286,7 @@ class _SetTargetPageState extends State<SetTargetPage> {
               icon: const Icon(Icons.home, size: 40),
               color: Colors.white,
               onPressed: () {
-                Navigator.pushNamed(context, '/homePage'); // Navigate to the home page
+                Navigator.pushNamed(context, '/'); // Navigate to the home page
               },
             ),
             // Barcode Scanner Button

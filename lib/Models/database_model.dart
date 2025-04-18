@@ -3,7 +3,7 @@
 class CalorieCount {
   int? id; // Primary key, auto-increment
   String name; // Field for the name
-  String calories; // Field for calories
+  double calories; // Field for calories
   int month; // Field for the month
   int date; // Field for the date (e.g., 1st, 2nd, etc.)
   String dayOfWeek; // Field for the day (e.g., Monday, Tuesday, etc.)
@@ -53,19 +53,19 @@ class CalorieCount {
   /// Create a `CalorieCount` object from a Map (retrieved from the database).
   factory CalorieCount.fromMap(Map<String, dynamic> map) {
     return CalorieCount(
-      id: map['id'],
-      name: map['name'],
-      calories: map['calories'],
-      month: map['month'],
-      date: map['date'],
-      dayOfWeek: map['dayOfWeek'],
-      weeklyTarget: map['weeklyTarget'],
-      dailyTarget: map['dailyTarget'],
-      calorieTotals: map['calorieTotals'],
-      remainingCaloriesDaily: map['remainingCaloriesDaily'],
-      remainingCaloriesWeekly: map['remainingCaloriesWeekly'],
-      progressDaily: map['progressDaily'],
-      progressWeekly: map['progressWeekly'],
+      id: map['id'] as int,
+      name: map['name'] as String,
+      calories: (map['calories'] as num).toDouble(),
+      month: map['month'] as int,
+      date: map['date'] as int,
+      dayOfWeek: map['dayOfWeek'] as String,
+      weeklyTarget: map['weeklyTarget'] as int, 
+      dailyTarget: map['dailyTarget'] as int,
+      calorieTotals: (map['calorieTotals'] as num).toDouble(),
+      remainingCaloriesDaily: (map['remainingCaloriesDaily'] as num).toDouble(),
+      remainingCaloriesWeekly: (map['remainingCaloriesWeekly'] as num).toDouble(),
+      progressDaily: (map['progressDaily'] as num).toDouble(),
+      progressWeekly: (map['progressWeekly'] as num).toDouble(),
     );
   }
 }

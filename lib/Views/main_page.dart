@@ -2,6 +2,7 @@ import 'package:firstflutterapp/Views/barcode_page.dart';
 import 'package:firstflutterapp/Views/calorie_page.dart';
 import 'package:firstflutterapp/Views/nutrition_page.dart';
 import 'package:firstflutterapp/Views/settings_page.dart';
+import 'package:firstflutterapp/Views/gym_calculator_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -86,7 +87,10 @@ class MainPage extends StatelessWidget {
                     icon: Icons.info,
                     label: 'Gym Progression',
                     onPressed: () {
-
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const GymProgressionPage()),
+                      );
               
                       // Show Information Popup
                     },

@@ -1,9 +1,9 @@
-import 'package:firstflutterapp/Views/alternative_products_page.dart';
 import 'package:firstflutterapp/Views/barcode_page.dart';
 import 'package:firstflutterapp/Views/nutrition_page.dart';
 import 'package:firstflutterapp/Views/set_calories_page.dart';
 import 'package:firstflutterapp/Views/set_target_page.dart';
 import 'package:firstflutterapp/Views/settings_page.dart';
+import 'package:firstflutterapp/Views/gym_calculator_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'provider/calorie_count_provider.dart';
@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
           '/nutritionPage': (context) => const NutritionPage(),
           '/setTargetPage': (context) => const SetTargetPage(),  
           '/setCaloriePage': (context) => const SetCaloriesPage(),
+          '/gymProgressionpage': (context) => const GymProgressionPage(), 
         },
       ),
     );

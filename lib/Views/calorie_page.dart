@@ -1,10 +1,7 @@
-import 'package:firstflutterapp/Models/database_model.dart';
-import 'package:firstflutterapp/Services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firstflutterapp/Provider/calorie_count_provider.dart';
 import 'package:firstflutterapp/Views/set_calories_page.dart';
-import 'package:firstflutterapp/Views/set_target_page.dart';
 
 class CaloriePage extends StatelessWidget {
   const CaloriePage({super.key});
@@ -153,6 +150,7 @@ class CaloriePage extends StatelessWidget {
                           onPressed: () {
                             provider.clearCalorieCountsAsync();
                             debugPrint('Calorie counts cleared.');
+                            Navigator.pushNamed(context, '/setTargetPage');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
@@ -186,13 +184,15 @@ class CaloriePage extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     // ListView for Today's Tracked Calories
-                    const Text(
+                    const Center(
+                    child: Text(
                       'Today\'s Tracked Calories',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.orange,
                       ),
+                    ),
                     ),
                     const SizedBox(height: 10),
                     if (provider.calorieTotal == 0)
@@ -203,57 +203,36 @@ class CaloriePage extends StatelessWidget {
                         ),
                       )
                     else
-                      FutureBuilder<List<CalorieCount>>(
-                        future: DatabaseService().getCalorieCounts(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-
-                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                            return const Center(
-                              child: Text(
-                                'No calories tracked for today.',
-                                style: TextStyle(fontSize: 16, color: Colors.grey),
-                              ),
-                            );
-                          }
-
-                          final calorieEntries = snapshot.data!;
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: calorieEntries.length,
-                            itemBuilder: (context, index) {
-                              final entry = calorieEntries[index];
-                              return Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                margin: const EdgeInsets.symmetric(vertical: 5),
-                                child: ListTile(
-                                  title: Text(
-                                    entry.name ?? 'Unknown Product',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    '${entry.calories ?? 0} kcal',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
+                          ListView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    itemCount: provider.todayCalorieCounts.length, // Use the provider's list
+    itemBuilder: (context, index) {
+      final entry = provider.todayCalorieCounts[index];
+      return Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        child: ListTile(
+          title: Text(
+            entry.name ?? 'Unknown Product',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Text(
+            '${entry.calories ?? 0} kcal',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      );
+    },
+                          ),
                     const SizedBox(height: 20),
 
                     // Calendar Icon Button
