@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:firstflutterapp/Provider/calorie_count_provider.dart';
+import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+      return ChangeNotifierProvider(
+      create: (_) => CalorieCountProvider(),
+    child: Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
@@ -30,7 +34,7 @@ class SettingsPage extends StatelessWidget {
               // Clear Database Button
               ElevatedButton(
                 onPressed: () {
-                  // Add logic to clear the database
+                  
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Database cleared!')),
                   );
@@ -53,78 +57,25 @@ class SettingsPage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Toggle Dark Mode Button
-              ElevatedButton(
-                onPressed: () {
-                  // Add logic to toggle dark mode
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Dark mode toggled!')),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Text(
-                  'Toggle Dark Mode',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Text-to-Speech Toggle
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Enable Text-to-Speech',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Switch(
-                    value: false, // Replace with a dynamic value from a provider or state
-                    onChanged: (bool value) {
-                      // Add logic to toggle Text-to-Speech
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(value
-                              ? 'Text-to-Speech enabled!'
-                              : 'Text-to-Speech disabled!'),
-                        ),
-                      );
-                    },
-                    activeColor: Colors.orange,
-                  ),
+              
                 ],
               ),
-            ],
           ),
         ),
-      ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.black,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-              width: 120,
-              height: 90,
+              width: 100,
+              height: 100,
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context); // Navigate back to the home page
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
-                  shape: const CircleBorder(),
                 ),
                 child: const Icon(
                   Icons.home,
@@ -136,6 +87,7 @@ class SettingsPage extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

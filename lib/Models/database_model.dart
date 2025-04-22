@@ -4,6 +4,13 @@ class CalorieCount {
   int? id; // Primary key, auto-increment
   String name; // Field for the name
   double calories; // Field for calories
+  String? activityType;
+  String? subActivityType;
+  double salt;
+  double sugar;
+  double protein;
+  double fat;
+  double satFat;
   int month; // Field for the month
   int date; // Field for the date (e.g., 1st, 2nd, etc.)
   String dayOfWeek; // Field for the day (e.g., Monday, Tuesday, etc.)
@@ -19,6 +26,13 @@ class CalorieCount {
     this.id,
     required this.name,
     required this.calories,
+    this.activityType,
+    this.subActivityType,
+    required this.salt,
+    required this.sugar,
+    required this.protein,
+    required this.fat,
+    required this.satFat,
     required this.month,
     required this.date,
     required this.dayOfWeek,
@@ -36,7 +50,14 @@ class CalorieCount {
     return {
       'id': id,
       'name': name,
+      'activityType': activityType,
+      'subActivityType': subActivityType,
       'calories': calories,
+      'salt': salt,
+      'sugar': sugar,
+      'protein': protein,
+      'fat': fat,
+      'satFat': satFat,
       'month': month,
       'date': date,
       'dayOfWeek': dayOfWeek,
@@ -56,6 +77,13 @@ class CalorieCount {
       id: map['id'] as int,
       name: map['name'] as String,
       calories: (map['calories'] as num).toDouble(),
+      activityType: map['activityType'] as String?, 
+      subActivityType: map['subActivityType'] as String?,
+      salt: (map['salt'] as num).toDouble(),
+      sugar: (map['sugar'] as num).toDouble(),
+      protein: (map['protein'] as num).toDouble(),
+      fat: (map['fat'] as num).toDouble(),
+      satFat: (map['satFat'] as num).toDouble(),
       month: map['month'] as int,
       date: map['date'] as int,
       dayOfWeek: map['dayOfWeek'] as String,
@@ -66,45 +94,6 @@ class CalorieCount {
       remainingCaloriesWeekly: (map['remainingCaloriesWeekly'] as num).toDouble(),
       progressDaily: (map['progressDaily'] as num).toDouble(),
       progressWeekly: (map['progressWeekly'] as num).toDouble(),
-    );
-  }
-}
-
-/// This class is used to store the view data that is shared across the main page and the carousel view.
-class ViewData {
-  String viewType; // "Daily" or "Weekly"
-  String target; // The target value (e.g., "1500" or "10500")
-  String calorieTotal; // The total calories for the view
-  String remainingCalories; // Remaining calories
-  double progress; // The progress value (e.g., "50%")
-
-  ViewData({
-    required this.viewType,
-    required this.target,
-    required this.calorieTotal,
-    required this.remainingCalories,
-    required this.progress,
-  });
-
-  /// Convert a `ViewData` object into a Map for database storage.
-  Map<String, dynamic> toMap() {
-    return {
-      'viewType': viewType,
-      'target': target,
-      'calorieTotal': calorieTotal,
-      'remainingCalories': remainingCalories,
-      'progress': progress,
-    };
-  }
-
-  /// Create a `ViewData` object from a Map (retrieved from the database).
-  factory ViewData.fromMap(Map<String, dynamic> map) {
-    return ViewData(
-      viewType: map['viewType'],
-      target: map['target'],
-      calorieTotal: map['calorieTotal'],
-      remainingCalories: map['remainingCalories'],
-      progress: map['progress'],
     );
   }
 }

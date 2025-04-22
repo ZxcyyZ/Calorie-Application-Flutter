@@ -1,4 +1,9 @@
+import 'package:firstflutterapp/Models/database_model.dart';
+import 'package:firstflutterapp/Provider/calorie_count_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:firstflutterapp/Services/database_service.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class GymProgressionPage extends StatefulWidget {
   const GymProgressionPage({super.key});
@@ -167,9 +172,9 @@ class _GymProgressionPageState extends State<GymProgressionPage> {
     'Basketball: Wheelchair': 4.5,
     'Basketball: Playing a game': 6.5,
     'Bowling': 3.0,
-    'Dancing: Disco, Ballroom, Square': 5.5,
-    'Dancing: Slow, Waltz, Foxtrot': 3.0,
-    'Dancing: Fast, Ballet, Twist': 7.0,
+    'Dancing: disco, ballroom, square': 5.5,
+    'Dancing: slow, waltz, foxtrot': 3.0,
+    'Dancing: fast, ballet, twist': 7.0,
     'Football: Competitive': 8.0,
     'Football: Touch, Flag, General': 4.0,
     'Frisbee': 3.0,
@@ -237,7 +242,11 @@ class _GymProgressionPageState extends State<GymProgressionPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+     return ChangeNotifierProvider<CalorieCountProvider>(
+          create: (_) => CalorieCountProvider()..loadTargetsAsync(),
+          builder: (context, child) {
+             final calorieProvider = Provider.of<CalorieCountProvider>(context, listen: false);
+      return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
         title: const Text(
@@ -411,6 +420,46 @@ class _GymProgressionPageState extends State<GymProgressionPage> {
           final totalMinutes = (hours * 60) + minutes;
           final burntCalorie = (met * weight * totalMinutes) / 200;
 
+          
+
+          int dailyTarget = calorieProvider.dailyTarget ?? 0;
+          int weeklyTarget = calorieProvider.weeklyTarget ?? 0;
+          double remainingDaily = ((calorieProvider.remainingCaloriesDaily ?? 0) + burntCalorie);
+          double remainingWeekly = ((calorieProvider.remainingCaloriesWeekly ?? 0) + burntCalorie);
+          double progressDaily = ((dailyTarget - remainingDaily) / dailyTarget).clamp(0.0, 1.0);
+          double progressWeekly = ((weeklyTarget - remainingWeekly) / weeklyTarget).clamp(0.0, 1.0);
+
+          print('Daily Target Gym: $dailyTarget');
+          print('Weekly Target Gym: $weeklyTarget');
+
+
+          if (burntCalorie > 0) {
+
+            final calorieCount = CalorieCount(
+            name: "Exercise", 
+            calories: burntCalorie, 
+            activityType: selectedOption, 
+            subActivityType: selectedSubOption, 
+            salt: 0, 
+            sugar: 0, 
+            protein: 0, 
+            fat: 0, 
+            satFat: 0, 
+            month: DateTime.now().month, 
+            date: DateTime.now().day, 
+            dayOfWeek: DateFormat('EEEE').format(DateTime.now()), 
+            weeklyTarget: weeklyTarget , 
+            dailyTarget: dailyTarget, 
+            calorieTotals: 0, 
+            remainingCaloriesDaily: remainingDaily, 
+            remainingCaloriesWeekly: remainingWeekly, 
+            progressDaily: progressDaily, 
+            progressWeekly: progressWeekly);
+            
+            final databaseService = DatabaseService();
+            databaseService.saveCalorieCount(calorieCount);
+          }
+
           if(burntCalorie > 0){
               setState((){
               resultText = 'You have burnt approximately ${burntCalorie.toStringAsFixed(2)} calories. Calories burned have been added to your calorie count.'; 
@@ -497,5 +546,7 @@ class _GymProgressionPageState extends State<GymProgressionPage> {
         ),
       ),
     );
+  }
+  );
   }
 }

@@ -10,8 +10,8 @@ class DatabaseService {
 
   Database? _database;
 
-  static const int _databaseVersion = 2; // Increment this version for schema updates
-  static const String _databaseName = 'calorie_tracker.db';
+  static const int _databaseVersion = 4; // Increment this version for schema updates
+  static const String _databaseName = 'calorie_tracker3.db';
 
   /// Initialize the database
   Future<Database> get database async {
@@ -35,6 +35,13 @@ class DatabaseService {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
             calories REAL,
+            activityType TEXT,
+            subActivityType TEXT,
+            salt REAL,
+            sugar REAL, 
+            protein REAL,
+            fat REAL,
+            satFat REAL,
             month INTEGER,
             date INTEGER,
             dayOfWeek TEXT,
@@ -49,7 +56,7 @@ class DatabaseService {
         ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 2) {
+        if (oldVersion <= 3) {
           await db.execute('ALTER TABLE CalorieCount RENAME TO CalorieCount_old');
 
           await db.execute('''
@@ -82,45 +89,44 @@ class DatabaseService {
     );
   }
 
-  /// Retrieve calorie counts for the current day and month
-  Future<CalorieCount?> getCalorieCounts() async {
+  Future<List<CalorieCount>> getCalorieCounts() async {
     final db = await database;
     final today = DateTime.now();
 
-    // Query the database for a record matching today's date and month
-    final result = await db.query(
+    // Query the database for all records matching today's date and month
+    final results = await db.query(
       'CalorieCount',
       where: 'date = ? AND month = ?',
       whereArgs: [today.day, today.month],
-      limit: 1, // Limit to one result
     );
 
-    if (result.isNotEmpty) {
-      // Map the result to a CalorieCount object
-      return CalorieCount.fromMap(result.first);
-    }
-
-    print('No calorie record found for today (${today.day}/${today.month}).');
-    return null; // Return null if no record is found
-  }
+    // Map all results to a list of CalorieCount objects
+    return results.map((e) => CalorieCount.fromMap(e)).toList();
+}
 
   /// Save or update a CalorieCount record
-  Future<int> saveCalorieCount(CalorieCount calorieCount) async {
-    final db = await database;
+Future<int> saveCalorieCount(CalorieCount calorieCount) async {
+  final db = await database;
 
-    if (calorieCount.id != null) {
-      // Update existing record
-      return await db.update(
-        'CalorieCount',
-        calorieCount.toMap(),
-        where: 'id = ?',
-        whereArgs: [calorieCount.id],
-      );
-    } else {
-      // Insert new record
-      return await db.insert('CalorieCount', calorieCount.toMap());
-    }
+  if (calorieCount.id != null) {
+    // Debug: Log the record being updated
+    print('Updating record: ${calorieCount.toMap()}');
+
+    // Update existing record
+    return await db.update(
+      'CalorieCount',
+      calorieCount.toMap(),
+      where: 'id = ?',
+      whereArgs: [calorieCount.id],
+    );
+  } else {
+    // Debug: Log the record being inserted
+    print('Inserting new record: ${calorieCount.toMap()}');
+
+    // Insert new record
+    return await db.insert('CalorieCount', calorieCount.toMap());
   }
+}
 
   /// Clear all records from the CalorieCount table
   Future<void> clearCalorieCounts() async {
@@ -158,8 +164,16 @@ class DatabaseService {
     } else {
       // Create a new record
       final newRecord = CalorieCount(
+        id: null, // Auto-incremented by the database
         name: name,
         calories: calories, // Ensure this is a double
+        activityType: null,
+        subActivityType: null,
+        salt: 0.0,
+        sugar: 0.0,
+        protein: 0.0, 
+        fat: 0.0,
+        satFat: 0.0,
         date: day,
         month: month,
         dayOfWeek: dayOfWeek,

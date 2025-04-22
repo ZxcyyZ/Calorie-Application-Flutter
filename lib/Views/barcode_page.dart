@@ -1,7 +1,12 @@
+import 'package:firstflutterapp/Provider/calorie_count_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:provider/provider.dart';
 import 'package:firstflutterapp/Provider/product_api_provider.dart';
+import 'package:firstflutterapp/Models/database_model.dart';
+import 'package:firstflutterapp/Services/database_service.dart'; 
+import 'package:intl/intl.dart';
+
 
 class BarcodePage extends StatefulWidget {
   const BarcodePage({super.key});
@@ -24,10 +29,14 @@ class _BarcodePageState extends State<BarcodePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Provider<ProductApiProvider>(
-      create: (_) => ProductApiProvider(),
-      builder: (context, child){
-    final productProvider = Provider.of<ProductApiProvider>(context);
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CalorieCountProvider()),
+        ChangeNotifierProvider(create: (_) => ProductApiProvider()),
+      ],
+      builder: (context, child) {
+        final productProvider = Provider.of<ProductApiProvider>(context);
+        final calorieCountProvider = Provider.of<CalorieCountProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
@@ -94,7 +103,8 @@ class _BarcodePageState extends State<BarcodePage> {
                         'Sugars (g): ${product.nutriments?.sugars ?? 'N/A'}\n'
                         'Protein per 100g (g): ${product.nutriments?.proteinsServe ?? 'N/A'}\n'
                         'Fat (g): ${product.nutriments?.fat ?? 'N/A'}\n'
-                        'Saturated Fat (g): ${product.nutriments?.saturatedFat ?? 'N/A'}',
+                        'Saturated Fat (g): ${product.nutriments?.saturatedFat ?? 'N/A'} \n \n'
+                        'Would you like to add this product to your daily calorie count?',
                       ),
                       actions: [
                         TextButton(
@@ -103,10 +113,20 @@ class _BarcodePageState extends State<BarcodePage> {
                           setState(() {
                             detected = true;
                           });
+                          addCalories(context, product, calorieCountProvider);
                           },
-                          child: const Text('OK'),
+                          child: const Text('Yes'),
                         
-                          
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            // Handle "Yes" action
+                            Navigator.pop(context);
+                            setState(() {
+                              detected = true;
+                            });
+                          },
+                          child: const Text('No'),
                         ),
                       ],
                     ),
@@ -177,4 +197,75 @@ class _BarcodePageState extends State<BarcodePage> {
       }
     );
   }
+}
+
+void addCalories(BuildContext context, dynamic product, CalorieCountProvider calorieCountProvider) async {
+  // Retrieve calorie data
+  double calories = 0.0;
+  if (product.nutriments != null) {
+    if ((product.nutriments?.energyServe ?? 0) > 0) {
+      calories = product.nutriments!.energyServe!;
+    } else {
+      calories = product.nutriments?.energy ?? 0.0;
+    }
+  }
+
+  // Fetch missing variables from the provider
+  await calorieCountProvider.loadTargetsAsync();
+  double newCalorieTotal = calorieCountProvider.calorieTotal ?? 0.0;
+
+  newCalorieTotal += calories;
+
+  // Update daily and weekly targets if available
+  int newDailyTarget = calorieCountProvider.dailyTarget ?? 0;
+  int newWeeklyTarget = calorieCountProvider.weeklyTarget ?? 0;
+
+  // Update remaining daily and weekly calories
+  double newRemainD = (calorieCountProvider.remainingCaloriesDaily ?? 0) - newCalorieTotal;
+  double newRemainW = (calorieCountProvider.remainingCaloriesWeekly ?? 0) - newCalorieTotal;
+
+  // Calculate daily progress
+  double newProgDay = 0.0;
+  if (newDailyTarget > 0) {
+    double total = newDailyTarget - newRemainD;
+    newProgDay = total / newDailyTarget;
+    newProgDay = newProgDay.clamp(0.0, 1.0);
+  }
+
+  // Calculate weekly progress
+  double newProgWeek = 0.0;
+  if (newWeeklyTarget > 0) {
+    double total = newWeeklyTarget - newRemainW;
+    newProgWeek = total / newWeeklyTarget;
+    newProgWeek = newProgWeek.clamp(0.0, 1.0);
+  }
+
+  // Create a CalorieCount object
+  final calorieCount = CalorieCount(
+    name: product.productName ?? "Unknown Product",
+    calories: calories,
+    salt: product.nutriments?.salt ?? 0.0,
+    sugar: product.nutriments?.sugars ?? 0.0,
+    protein: product.nutriments?.proteinsServe ?? 0.0,
+    fat: product.nutriments?.fat ?? 0.0,
+    satFat: product.nutriments?.saturatedFat ?? 0.0,  
+    month: DateTime.now().month, // Ensure this is an int
+    date: DateTime.now().day, // Ensure this is an int
+    dayOfWeek:  DateFormat('EEEE').format(DateTime.now()), // Updated to return the day name
+    weeklyTarget: newWeeklyTarget, // Already an int
+    dailyTarget: newDailyTarget, // Already an int
+    calorieTotals: newCalorieTotal, // This is a double, ensure the model accepts double
+    remainingCaloriesDaily: newRemainD, // This is a double, ensure the model accepts double
+    remainingCaloriesWeekly: newRemainW, // This is a double, ensure the model accepts double
+    progressDaily: newProgDay, // This is a double, ensure the model accepts double
+    progressWeekly: newProgWeek, // This is a double, ensure the model accepts double
+  );
+
+  // Save calorie data to the database
+  await DatabaseService().saveCalorieCount(calorieCount);
+
+  // Show success message
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Calorie data has been added to the database.")),
+  );
 }

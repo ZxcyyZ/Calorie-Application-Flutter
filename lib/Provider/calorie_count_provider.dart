@@ -23,24 +23,33 @@ class CalorieCountProvider extends ChangeNotifier {
   double get weeklyProgressValue => _weeklyProgressValue;
   List<CalorieCount> get todayCalorieCounts => _todayCalorieCounts; 
 
-  // Method to load today's calorie counts
-Future<void> loadTodayCalorieCountsAsync() async {
+ Future<void> loadTodayCalorieCountsAsync({DateTime? selectedDate}) async {
   try {
+    // Fetch all matching calorie counts from the database
     final todayCalorieCounts = await DatabaseService().getCalorieCounts();
 
-    if (todayCalorieCounts != null) {
-      _todayCalorieCounts = [todayCalorieCounts]; // Store the fetched data as a list
+    if (todayCalorieCounts != null && todayCalorieCounts.isNotEmpty) {
+      final targetDate = selectedDate ?? DateTime.now();
 
-      // Safely sum the calorie values
-      _calorieTotal = _todayCalorieCounts.fold(0.0, (double sum, item) {
-        return sum + item.calories; // item.calories is already a double
-      });
+      // Save all fetched data directly
+      _todayCalorieCounts = todayCalorieCounts
+          .where((entry) => 
+              entry.name != 'Calorie Targets' && // Adjust the condition as needed
+              entry.date == targetDate.day && entry.month == targetDate.month)
+          .toList()
+          .reversed
+          .toList();
+      // Debug: Print each calorie count in the list
+      for (var item in _todayCalorieCounts) {
+        debugPrint('Stored calorie record: ${item.toString()}');
+      }
     } else {
       // If no data is found, reset the values
       _todayCalorieCounts = [];
-      _calorieTotal = 0.0;
+      debugPrint('No calorie records found for today.');
     }
 
+    // Notify listeners of state changes
     notifyListeners();
   } catch (e) {
     debugPrint('Error loading today\'s calorie counts: $e');

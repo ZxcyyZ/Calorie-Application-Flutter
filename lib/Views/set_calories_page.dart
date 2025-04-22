@@ -2,12 +2,13 @@ import 'package:firstflutterapp/Models/database_model.dart';
 import 'package:firstflutterapp/Views/barcode_page.dart';
 import 'package:firstflutterapp/Views/nutrition_page.dart';
 import 'package:firstflutterapp/Views/settings_page.dart';
+import 'package:firstflutterapp/Views/calorie_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // For haptic feedback
 import 'package:provider/provider.dart';
 import 'package:firstflutterapp/Provider/product_api_provider.dart';
-import 'package:firstflutterapp/Provider/calorie_count_provider.dart'; // Import the CalorieCountProvider
-import 'package:firstflutterapp/Services/database_service.dart'; // Replace with your actual database service
+import 'package:firstflutterapp/Provider/calorie_count_provider.dart'; 
+import 'package:firstflutterapp/Services/database_service.dart'; 
+import 'package:intl/intl.dart';
 
 class SetCaloriesPage extends StatelessWidget {
   const SetCaloriesPage({super.key});
@@ -171,7 +172,10 @@ class SetCaloriesPage extends StatelessWidget {
                                         ElevatedButton(
                                           onPressed: () {
                                             addCalories(context, product, calorieCountProvider);
-                                          },
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context)=> const CaloriePage()),
+                                            );},
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.blue, // Changed to blue
                                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -363,9 +367,14 @@ class SetCaloriesPage extends StatelessWidget {
   final calorieCount = CalorieCount(
     name: product.productName ?? "Unknown Product",
     calories: calories,
+    salt: product.nutriments?.salt ?? 0.0,
+    sugar: product.nutriments?.sugars ?? 0.0,
+    protein: product.nutriments?.proteinsServe ?? 0.0,
+    fat: product.nutriments?.fat ?? 0.0,
+    satFat: product.nutriments?.saturatedFat ?? 0.0,  
     month: DateTime.now().month, // Ensure this is an int
     date: DateTime.now().day, // Ensure this is an int
-    dayOfWeek: DateTime.now().weekday.toString(),
+    dayOfWeek:  DateFormat('EEEE').format(DateTime.now()), // Updated to return the day name
     weeklyTarget: newWeeklyTarget, // Already an int
     dailyTarget: newDailyTarget, // Already an int
     calorieTotals: newCalorieTotal, // This is a double, ensure the model accepts double
