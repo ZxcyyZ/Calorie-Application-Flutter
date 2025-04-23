@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firstflutterapp/Models/database_model.dart'; // Import the CalorieCount model
 import 'package:firstflutterapp/Services/database_service.dart'; // Import the DatabaseService
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CalorieCountProvider extends ChangeNotifier {
   // Private fields for storing property values
@@ -150,4 +151,39 @@ class CalorieCountProvider extends ChangeNotifier {
     _weeklyProgressValue = (_weeklyTarget - _remainingCaloriesWeekly) / _weeklyTarget;
     notifyListeners();
   }
+
+  void resetTargets() {
+  _dailyTarget = 0; // Reset daily target
+  _remainingCaloriesDaily = 0; // Reset daily remaining calories
+  _weeklyTarget = 0; // Reset weekly target
+  _remainingCaloriesWeekly = 0; // Reset weekly remaining calories
+  notifyListeners(); // Notify listeners to update the UI
+  }
+
+  
+
+Future<void> checkAndResetTargets() async {
+  final prefs = await SharedPreferences.getInstance();
+  final lastResetDate = prefs.getString('lastResetDate');
+  final now = DateTime.now();
+
+  if (lastResetDate != null) {
+    final lastReset = DateTime.parse(lastResetDate);
+
+    // Check if the day has changed
+    if (now.difference(lastReset).inDays >= 1) {
+      resetTargets(); // Reset daily target
+      prefs.setString('lastResetDate', now.toIso8601String());
+    }
+
+    // Check if the week has changed
+    if (now.weekday == DateTime.monday && lastReset.weekday != DateTime.monday) {
+      resetTargets(); // Reset weekly target
+      prefs.setString('lastResetDate', now.toIso8601String());
+    }
+  } else {
+    // First-time setup
+    prefs.setString('lastResetDate', now.toIso8601String());
+  }
+}
 }

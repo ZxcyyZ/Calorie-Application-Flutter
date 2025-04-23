@@ -21,7 +21,7 @@ class _CaloriePageState extends State<CaloriePage> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => CalorieCountProvider()..loadTargetsAsync()..loadTodayCalorieCountsAsync(),
+      create: (_) => CalorieCountProvider()..loadTargetsAsync()..loadTodayCalorieCountsAsync()..checkAndResetTargets(),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.orange,

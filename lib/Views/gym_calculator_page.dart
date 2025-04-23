@@ -240,6 +240,23 @@ class _GymProgressionPageState extends State<GymProgressionPage> {
     'Reading: Sitting': 1.3,
     'Sleeping': 0.9,
     'Watching TV': 1.0,
+    'Aerobics Steps: High Impact': 8.5,
+    'Aerobics Steps: Low Impact': 6.5,
+    'Aerobics: High Impact': 7.3,
+    'Aerobics: Low Impact': 5.0,
+    'Aerobics: Water': 5.5,
+    'Cycling, Stationary: Moderate': 7.0,
+    'Cycling, Stationary: Vigorous': 10.0,
+    'Calisthenics: Moderate': 3.8,
+    'Calisthenics: Vigorous': 8.0,
+    'Elliptical Trainer: General': 5.0,
+    'Rowing, Stationary: Moderate': 7.0,
+    'Rowing, Stationary: Vigorous': 8.5,
+    'Stair Step Machine: General': 9.0,
+    'Circuit Training: General': 8.0,
+    'Ski Machine: General': 6.8,
+    'Stretching Hatha Yoga': 2.5,
+
   };
 
   @override
