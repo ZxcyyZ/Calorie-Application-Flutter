@@ -1,4 +1,6 @@
 import 'package:firstflutterapp/Models/database_model.dart';
+import 'package:firstflutterapp/Views/main_page.dart';
+import 'package:firstflutterapp/Views/settings_page.dart';
 import 'package:firstflutterapp/Provider/calorie_count_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firstflutterapp/Services/database_service.dart';
@@ -369,7 +371,7 @@ class _GymProgressionPageState extends State<GymProgressionPage> {
       Padding(
         padding: const EdgeInsets.only(right: 70.0),
       child: IconButton(
-        icon: const Icon(Icons.info, size: 40, color: Colors.orange),
+        icon: const Icon(Icons.info, size: 40, color: Colors.blue),
         onPressed: () {
           showDialog(
             context: context,
@@ -474,7 +476,7 @@ class _GymProgressionPageState extends State<GymProgressionPage> {
           
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
+          backgroundColor: Colors.blue,
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
         ),
         child: const Text(
@@ -532,14 +534,20 @@ class _GymProgressionPageState extends State<GymProgressionPage> {
               icon: const Icon(Icons.home, size: 40),
               color: Colors.white,
               onPressed: () {
-                Navigator.pop(context); // Navigate back to the home page
+                Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainPage()),
+                );
               },
             ),
             IconButton(
               icon: const Icon(Icons.settings, size: 40),
               color: Colors.white,
               onPressed: () {
-                Navigator.pushNamed(context, '/settingsPage'); // Navigate to the settings page
+              Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SettingsPage()),
+              );
               },
             ),
           ],

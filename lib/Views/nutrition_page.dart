@@ -1,5 +1,7 @@
 import 'package:firstflutterapp/Views/alternative_products_page.dart';
-import 'package:firstflutterapp/Views/barcode_page.dart'; // Import the Barcode Page
+import 'package:firstflutterapp/Views/barcode_page.dart';
+import 'package:firstflutterapp/Views/main_page.dart';
+import 'package:firstflutterapp/Views/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firstflutterapp/Provider/product_api_provider.dart';
@@ -180,7 +182,7 @@ class NutritionPage extends StatelessWidget {
                                           ElevatedButton(
                                             onPressed: () async {
                                               debugPrint('Finding alternatives for: ${product.productName}');
-                                              Navigator.push(
+                                              Navigator.pushReplacement(
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) => AlternativeProductsPage(
@@ -199,7 +201,7 @@ class NutritionPage extends StatelessWidget {
                                               );
                                             },
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.orange,
+                                              backgroundColor: Colors.blue,
                                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                             ),
@@ -239,7 +241,7 @@ class NutritionPage extends StatelessWidget {
                                               );
                                             },
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.orange,
+                                              backgroundColor: Colors.blue,
                                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                             ),
@@ -274,7 +276,10 @@ class NutritionPage extends StatelessWidget {
                   icon: const Icon(Icons.home, size: 40),
                   color: Colors.white,
                   onPressed: () {
-                    Navigator.pop(context); // Navigate back to the home page
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainPage()),
+                    );
                   },
                 ),
                 // Barcode Scanner Button
@@ -283,9 +288,9 @@ class NutritionPage extends StatelessWidget {
                   height: 100, // Adjust the height
                   child: FloatingActionButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const BarcodePage()),
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const BarcodePage()),
                       );
                     },
                     backgroundColor: Colors.orange,
@@ -297,7 +302,10 @@ class NutritionPage extends StatelessWidget {
                   icon: const Icon(Icons.settings, size: 40),
                   color: Colors.white,
                   onPressed: () {
-                    Navigator.pushNamed(context, '/settingsPage'); // Navigate to settings page
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SettingsPage()),
+                    );
                   },
                 ),
               ],

@@ -1,6 +1,6 @@
 import 'package:firstflutterapp/Models/database_model.dart';
 import 'package:firstflutterapp/Views/barcode_page.dart';
-import 'package:firstflutterapp/Views/nutrition_page.dart';
+import 'package:firstflutterapp/Views/main_page.dart';
 import 'package:firstflutterapp/Views/settings_page.dart';
 import 'package:firstflutterapp/Views/calorie_page.dart';
 import 'package:flutter/material.dart';
@@ -172,9 +172,9 @@ class SetCaloriesPage extends StatelessWidget {
                                         ElevatedButton(
                                           onPressed: () {
                                             addCalories(context, product, calorieCountProvider);
-                                            Navigator.push(
+                                            Navigator.pushReplacement(
                                               context,
-                                              MaterialPageRoute(builder: (context)=> const CaloriePage()),
+                                              MaterialPageRoute(builder: (context) => const CaloriePage()),
                                             );},
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.blue, // Changed to blue
@@ -248,12 +248,12 @@ class SetCaloriesPage extends StatelessWidget {
               width: 150,
               height: 100,
               child: IconButton(
-              icon: const Icon(Icons.search, size: 40),
+              icon: const Icon(Icons.home, size: 40),
               color: Colors.white,
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context)=> const NutritionPage()),
+                Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainPage()),
                 );
               },
             ),
@@ -262,10 +262,10 @@ class SetCaloriesPage extends StatelessWidget {
               width: 100, // Adjust the width
               height: 100, // Adjust the height
               child: FloatingActionButton(
-                     onPressed: () {
-                       Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context)=> const BarcodePage()),
+              onPressed: () {
+                Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const BarcodePage()),
                 );
             // Navigate to Barcode Page
           },
@@ -281,9 +281,9 @@ class SetCaloriesPage extends StatelessWidget {
           icon: const Icon(Icons.settings, size: 40), // Adjust icon size
           color: Colors.white,
           onPressed: () {
-             Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context)=> const SettingsPage()),
+            Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SettingsPage()),
                 );
                 // Navigate to Settings Page
               },

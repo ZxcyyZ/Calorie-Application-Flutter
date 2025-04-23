@@ -4,6 +4,8 @@ import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:provider/provider.dart';
 import 'package:firstflutterapp/Provider/product_api_provider.dart';
 import 'package:firstflutterapp/Models/database_model.dart';
+import 'package:firstflutterapp/Views/main_page.dart';
+import 'package:firstflutterapp/Views/settings_page.dart';
 import 'package:firstflutterapp/Services/database_service.dart'; 
 import 'package:intl/intl.dart';
 
@@ -179,7 +181,10 @@ class _BarcodePageState extends State<BarcodePage> {
               icon: const Icon(Icons.home, size: 40),
               color: Colors.white,
               onPressed: () {
-                Navigator.pop(context); // Navigate back to the home page
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainPage()),
+                    );
               },
             ),
             // Settings Button
@@ -187,7 +192,10 @@ class _BarcodePageState extends State<BarcodePage> {
               icon: const Icon(Icons.settings, size: 40),
               color: Colors.white,
               onPressed: () {
-                Navigator.pushNamed(context, '/settingsPage'); // Navigate to settings page
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SettingsPage()),
+                  );
               },
             ),
           ],

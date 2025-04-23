@@ -1,4 +1,7 @@
 import 'package:firstflutterapp/Services/database_service.dart';
+import 'package:firstflutterapp/Views/calorie_page.dart';
+import 'package:firstflutterapp/Views/main_page.dart';
+import 'package:firstflutterapp/Views/settings_page.dart';
 import 'package:flutter/material.dart';
 
 class SetTargetPage extends StatefulWidget {
@@ -260,7 +263,14 @@ class _SetTargetPageState extends State<SetTargetPage> {
               // Calculate Button
               Center(
                 child: ElevatedButton(
-                  onPressed: calculateCalorieTarget,
+                  onPressed: () {
+                  calculateCalorieTarget();
+                  
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CaloriePage()),
+                  );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
@@ -286,7 +296,10 @@ class _SetTargetPageState extends State<SetTargetPage> {
               icon: const Icon(Icons.home, size: 40),
               color: Colors.white,
               onPressed: () {
-                Navigator.pushNamed(context, '/'); // Navigate to the home page
+                Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainPage()),
+                );
               },
             ),
             // Settings Button
@@ -294,7 +307,10 @@ class _SetTargetPageState extends State<SetTargetPage> {
               icon: const Icon(Icons.settings, size: 40),
               color: Colors.white,
               onPressed: () {
-                Navigator.pushNamed(context, '/settingsPage'); // Navigate to the settings page
+               Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SettingsPage()),
+               );
               },
             ),
           ],

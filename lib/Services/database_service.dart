@@ -10,8 +10,8 @@ class DatabaseService {
 
   Database? _database;
 
-  static const int _databaseVersion = 4; // Increment this version for schema updates
-  static const String _databaseName = 'calorie_tracker3.db';
+  static const int _databaseVersion = 7; // Increment this version for schema updates
+  static const String _databaseName = 'calorie_tracker7.db';
 
   /// Initialize the database
   Future<Database> get database async {
@@ -56,7 +56,7 @@ class DatabaseService {
         ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion <= 3) {
+        if (oldVersion <= 5) {
           await db.execute('ALTER TABLE CalorieCount RENAME TO CalorieCount_old');
 
           await db.execute('''

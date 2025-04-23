@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firstflutterapp/Provider/calorie_count_provider.dart';
+import 'package:firstflutterapp/Views/main_page.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -72,7 +73,10 @@ class SettingsPage extends StatelessWidget {
               height: 100,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // Navigate back to the home page
+                  Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MainPage()),
+                      );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,

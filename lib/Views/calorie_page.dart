@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firstflutterapp/Provider/calorie_count_provider.dart';
 import 'package:firstflutterapp/Views/set_calories_page.dart';
+import 'package:firstflutterapp/Views/set_target_page.dart';
+import 'package:firstflutterapp/Views/settings_page.dart';
 import 'package:firstflutterapp/Models/database_model.dart';
+import 'package:firstflutterapp/Views/main_page.dart';
 import 'package:intl/intl.dart';
 
 class CaloriePage extends StatefulWidget {
@@ -187,7 +190,10 @@ class _CaloriePageState extends State<CaloriePage> {
                           onPressed: () {
                             provider.clearCalorieCountsAsync();
                             debugPrint('Calorie counts cleared.');
-                            Navigator.pushNamed(context, '/setTargetPage');
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const SetTargetPage()),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
@@ -201,10 +207,10 @@ class _CaloriePageState extends State<CaloriePage> {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const SetCaloriesPage()),
-                            );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const SetCaloriesPage()),
+                          );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
@@ -264,14 +270,20 @@ class _CaloriePageState extends State<CaloriePage> {
                 icon: const Icon(Icons.home, size: 40),
                 color: Colors.white,
                 onPressed: () {
-                  Navigator.pop(context);
-                },
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MainPage()),
+                  );
+                  },
               ),
               IconButton(
                 icon: const Icon(Icons.settings, size: 40),
                 color: Colors.white,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/settingsPage');
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SettingsPage()),
+                    );
                 },
               ),
             ],

@@ -13,6 +13,12 @@ class CalorieCountProvider extends ChangeNotifier {
   double _weeklyProgressValue = 0;
   List<CalorieCount> _todayCalorieCounts = [];
 
+  double? salt;
+  double? sugar;
+  double? protein;
+  double? fat;
+  double? satFat;
+
   // Getters for accessing the properties
   int get weeklyTarget => _weeklyTarget;
   int get dailyTarget => _dailyTarget;
@@ -88,7 +94,49 @@ class CalorieCountProvider extends ChangeNotifier {
     }
   }
 
+ Future<void> calculateNutritionDailyTotals() async {
+  // Fetch the list of products for the current day
+  await loadTodayCalorieCountsAsync();
 
+  // Debug: Print each product in today's products
+  if (_todayCalorieCounts.isNotEmpty) {
+    debugPrint('Products for today:');
+    for (var product in _todayCalorieCounts) {
+      debugPrint(
+          'Product: ${product.name}, Salt: ${product.salt}, Protein: ${product.protein}, '
+          'Fat: ${product.fat}, Saturated Fat: ${product.satFat}, Sugar: ${product.sugar}');
+    }
+  } else {
+    debugPrint('No products found for today.');
+  }
+
+  // Initialize totals
+  double totalSalt = 0.0;
+  double totalProtein = 0.0;
+  double totalFat = 0.0;
+  double totalSaturatedFat = 0.0;
+  double totalSugar = 0.0;
+
+  // Sum up the values for each product
+  for (var product in _todayCalorieCounts) {
+    totalSalt += product.salt;
+    totalProtein += product.protein;
+    totalFat += product.fat;
+    totalSaturatedFat += product.satFat;
+    totalSugar += product.sugar;
+  }
+
+
+    // Update the properties
+    salt = totalSalt;
+    protein = totalProtein;
+    fat = totalFat;
+    satFat = totalSaturatedFat;
+    sugar = totalSugar;
+
+    // Notify listeners to update the UI
+    notifyListeners();
+ }
 
   // Method to increment calories
   void incrementCalories(int amount) {

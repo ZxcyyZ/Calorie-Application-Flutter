@@ -38,7 +38,10 @@ class ApiService {
           'https://world.openfoodfacts.org/cgi/search.pl?search_terms=${productName}&tagtype_0=countries&tag_contains_0=contains&tag_0=united%20kingdom&search_simple=1&json=1');
       print('Searching products by name from URL: $url'); // Debug line
 
-      final response = await _httpClient.get(url);
+      final response = await _httpClient
+      .get(url);
+      //.timeout(const Duration(seconds:20));
+      
 
       if (response.statusCode == 200) {
         print('API response received for product search.'); // Debug line
