@@ -182,7 +182,7 @@ class NutritionPage extends StatelessWidget {
                                           ElevatedButton(
                                             onPressed: () async {
                                               debugPrint('Finding alternatives for: ${product.productName}');
-                                              Navigator.pushReplacement(
+                                              Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) => AlternativeProductsPage(
