@@ -259,57 +259,34 @@ class _GymProgressionPageState extends State<GymProgressionPage> {
 
   };
 
-  @override
-  Widget build(BuildContext context) {
-     return ChangeNotifierProvider<CalorieCountProvider>(
-          create: (_) => CalorieCountProvider()..loadTargetsAsync(),
-          builder: (context, child) {
-             final calorieProvider = Provider.of<CalorieCountProvider>(context, listen: false);
+@override
+Widget build(BuildContext context) {
+  // Provide the CalorieCountProvider to manage state and load targets asynchronously
+  return ChangeNotifierProvider<CalorieCountProvider>(
+    create: (_) => CalorieCountProvider()..loadTargetsAsync(),
+    builder: (context, child) {
+      // Access the calorie provider
+      final calorieProvider = Provider.of<CalorieCountProvider>(context, listen: false);
+
       return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.orange,
-        title: const Text(
-          'Gym Calculator',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+        appBar: AppBar(
+          backgroundColor: Colors.orange, // Set the AppBar background color
+          title: const Text(
+            'Gym Calculator',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Select an Activity Type:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            DropdownButton<String>(
-              isExpanded: true,
-              value: selectedOption,
-              hint: const Text('Choose an activity'),
-              items: dropdownOptions.map((String option) {
-                return DropdownMenuItem<String>(
-                  value: option,
-                  child: Text(option),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedOption = newValue;
-                  selectedSubOption = null; // Reset sub-option when main option changes    
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-            if (selectedOption != null && subOptions.containsKey(selectedOption)) ...[
+        body: Padding(
+          padding: const EdgeInsets.all(20.0), // Add padding around the content
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // Align content to the start
+            children: [
+              // Dropdown for selecting an activity type
               const Text(
-                'Select a Sub-Activity:',
+                'Select an Activity Type:',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -318,260 +295,287 @@ class _GymProgressionPageState extends State<GymProgressionPage> {
               const SizedBox(height: 10),
               DropdownButton<String>(
                 isExpanded: true,
-                value: selectedSubOption,
-                
-                hint: const Text('Choose a sub-activity'),
-                items: subOptions[selectedOption!]?.map((String subOption) {
+                value: selectedOption,
+                hint: const Text('Choose an activity'),
+                items: dropdownOptions.map((String option) {
                   return DropdownMenuItem<String>(
-                    value: subOption,
-                    child: Text(subOption),
+                    value: option,
+                    child: Text(option),
                   );
                 }).toList(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    selectedSubOption = newValue;
+                    selectedOption = newValue;
+                    selectedSubOption = null; // Reset sub-option when main option changes
                   });
                 },
-               menuMaxHeight: 300,
               ),
-              const SizedBox(height: 20), 
-            ],
-            const Text (
-              'Enter Duration and Body Weight:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: hoursController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Hours',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)), 
-                    ),
+              const SizedBox(height: 20),
+
+              // Dropdown for selecting a sub-activity if an activity type is selected
+              if (selectedOption != null && subOptions.containsKey(selectedOption)) ...[
+                const Text(
+                  'Select a Sub-Activity:',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: minutesController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Minutes',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-                    ),
-                  ),
+                const SizedBox(height: 10),
+                DropdownButton<String>(
+                  isExpanded: true,
+                  value: selectedSubOption,
+                  hint: const Text('Choose a sub-activity'),
+                  items: subOptions[selectedOption!]?.map((String subOption) {
+                    return DropdownMenuItem<String>(
+                      value: subOption,
+                      child: Text(subOption),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedSubOption = newValue;
+                    });
+                  },
+                  menuMaxHeight: 300, // Limit dropdown height
                 ),
+                const SizedBox(height: 20),
               ],
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: weightController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Body Weight (kg)',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-              ),  
-            ),
-            const SizedBox(height: 20),
 
-            Center(
-  child: Row(
-    
-
-    children: [
-      Padding(
-        padding: const EdgeInsets.only(right: 70.0),
-      child: IconButton(
-        icon: const Icon(Icons.info, size: 40, color: Colors.blue),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text("About the Calculation"),
-                content: const Text(
-                  'The calculator estimates the number of calories you burn while performing a specific activity for a duration of time and your weight.\n'
-                  'The calculation uses MET (Metabolic Equivalent of Task) values for each activity to calculate calories burned.\n'
-                  'This represents the energy cost of physical activities as a multiple of resting metabolic rate.\n\n'
-                  'The formula used is: MET * weight (kg) * time (minutes) / 200.\n\n'
-                  'This is an approximation and actual calories burned may vary based on individual factors.',
+              // Input fields for duration and body weight
+              const Text(
+                'Enter Duration and Body Weight:',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
-                    },
-                    child: const Text(
-                      'OK',
-                      style: TextStyle(color: Colors.orange),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: hoursController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Hours',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: minutesController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Minutes',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
                     ),
                   ),
                 ],
-              );
-          
-            },
-          );
-        },
-      ),
-      ),
-      const SizedBox(width: 10), // Add spacing between the buttons
-      ElevatedButton(
-        onPressed: () {
-          final hours = int.tryParse(hoursController.text) ?? 0;
-          final minutes = int.tryParse(minutesController.text) ?? 0;
-          final weight = int.tryParse(weightController.text) ?? 0;
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: weightController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Body Weight (kg)',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                ),
+              ),
+              const SizedBox(height: 20),
 
-          if (selectedSubOption == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please select an activity type')),
-            );
-            return;
-          }
+              // Row with an info button and a calculate button
+              Center(
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 70.0),
+                      child: IconButton(
+                        icon: const Icon(Icons.info, size: 40, color: Colors.blue),
+                        onPressed: () {
+                          // Show information about the calculation
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("About the Calculation"),
+                                content: const Text(
+                                  'The calculator estimates the number of calories you burn while performing a specific activity for a duration of time and your weight.\n'
+                                  'The calculation uses MET (Metabolic Equivalent of Task) values for each activity to calculate calories burned.\n'
+                                  'This represents the energy cost of physical activities as a multiple of resting metabolic rate.\n\n'
+                                  'The formula used is: MET * weight (kg) * time (minutes) / 200.\n\n'
+                                  'This is an approximation and actual calories burned may vary based on individual factors.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // Close the dialog
+                                    },
+                                    child: const Text(
+                                      'OK',
+                                      style: TextStyle(color: Colors.orange),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 10), // Add spacing between the buttons
+                    ElevatedButton(
+                      onPressed: () {
+                        // Parse user input
+                        final hours = int.tryParse(hoursController.text) ?? 0;
+                        final minutes = int.tryParse(minutesController.text) ?? 0;
+                        final weight = int.tryParse(weightController.text) ?? 0;
 
-          final met = metValues[selectedSubOption!] ?? 0.0;
+                        // Validate that a sub-activity is selected
+                        if (selectedSubOption == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Please select an activity type')),
+                          );
+                          return;
+                        }
 
-          final totalMinutes = (hours * 60) + minutes;
-          final burntCalorie = (met * weight * totalMinutes) / 200;
+                        // Retrieve the MET value for the selected sub-activity
+                        final met = metValues[selectedSubOption!] ?? 0.0;
 
-          
+                        // Calculate calories burned
+                        final totalMinutes = (hours * 60) + minutes;
+                        final burntCalorie = (met * weight * totalMinutes) / 200;
 
-          int dailyTarget = calorieProvider.dailyTarget ?? 0;
-          int weeklyTarget = calorieProvider.weeklyTarget ?? 0;
-          double remainingDaily = ((calorieProvider.remainingCaloriesDaily ?? 0) + burntCalorie);
-          double remainingWeekly = ((calorieProvider.remainingCaloriesWeekly ?? 0) + burntCalorie);
-          double progressDaily = ((dailyTarget - remainingDaily) / dailyTarget).clamp(0.0, 1.0);
-          double progressWeekly = ((weeklyTarget - remainingWeekly) / weeklyTarget).clamp(0.0, 1.0);
+                        // Update calorie targets and progress
+                        int dailyTarget = calorieProvider.dailyTarget ?? 0;
+                        int weeklyTarget = calorieProvider.weeklyTarget ?? 0;
+                        double remainingDaily = ((calorieProvider.remainingCaloriesDaily ?? 0) + burntCalorie);
+                        double remainingWeekly = ((calorieProvider.remainingCaloriesWeekly ?? 0) + burntCalorie);
+                        double progressDaily = ((dailyTarget - remainingDaily) / dailyTarget).clamp(0.0, 1.0);
+                        double progressWeekly = ((weeklyTarget - remainingWeekly) / weeklyTarget).clamp(0.0, 1.0);
 
-          print('Daily Target Gym: $dailyTarget');
-          print('Weekly Target Gym: $weeklyTarget');
+                        // Save the calorie count to the database
+                        if (burntCalorie > 0) {
+                          final calorieCount = CalorieCount(
+                            name: "Exercise",
+                            calories: burntCalorie,
+                            activityType: selectedOption,
+                            subActivityType: selectedSubOption,
+                            salt: 0,
+                            sugar: 0,
+                            protein: 0,
+                            fat: 0,
+                            satFat: 0,
+                            month: DateTime.now().month,
+                            date: DateTime.now().day,
+                            dayOfWeek: DateFormat('EEEE').format(DateTime.now()),
+                            weeklyTarget: weeklyTarget,
+                            dailyTarget: dailyTarget,
+                            calorieTotals: 0,
+                            remainingCaloriesDaily: remainingDaily,
+                            remainingCaloriesWeekly: remainingWeekly,
+                            progressDaily: progressDaily,
+                            progressWeekly: progressWeekly,
+                          );
 
+                          final databaseService = DatabaseService();
+                          databaseService.saveCalorieCount(calorieCount);
+                        }
 
-          if (burntCalorie > 0) {
+                        // Update the result text
+                        if (burntCalorie > 0) {
+                          setState(() {
+                            resultText = 'You have burnt approximately ${burntCalorie.toStringAsFixed(2)} calories. Calories burned have been added to your calorie count.';
+                          });
+                        } else {
+                          setState(() {
+                            resultText = 'Error: Invalid input. Please check values are entered.';
+                          });
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      ),
+                      child: const Text(
+                        'Calculate',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
 
-            final calorieCount = CalorieCount(
-            name: "Exercise", 
-            calories: burntCalorie, 
-            activityType: selectedOption, 
-            subActivityType: selectedSubOption, 
-            salt: 0, 
-            sugar: 0, 
-            protein: 0, 
-            fat: 0, 
-            satFat: 0, 
-            month: DateTime.now().month, 
-            date: DateTime.now().day, 
-            dayOfWeek: DateFormat('EEEE').format(DateTime.now()), 
-            weeklyTarget: weeklyTarget , 
-            dailyTarget: dailyTarget, 
-            calorieTotals: 0, 
-            remainingCaloriesDaily: remainingDaily, 
-            remainingCaloriesWeekly: remainingWeekly, 
-            progressDaily: progressDaily, 
-            progressWeekly: progressWeekly);
-            
-            final databaseService = DatabaseService();
-            databaseService.saveCalorieCount(calorieCount);
-          }
-
-          if(burntCalorie > 0){
-              setState((){
-              resultText = 'You have burnt approximately ${burntCalorie.toStringAsFixed(2)} calories. Calories burned have been added to your calorie count.'; 
-            });
-          }
-          else{
-            setState((){
-              resultText = 'Error: Invalid input. Please check values are entered.';
-            });
-          }
-            
-          
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-        ),
-        child: const Text(
-          'Calculate',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+              // Display the result text if available
+              if (resultText.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.all(15),
+                  margin: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[100],
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3), // Changes position of shadow
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    resultText,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+            ],
           ),
         ),
-      ),
-      
-    ],
-  ),
-),
-            const SizedBox(height: 20),
-            if(resultText.isNotEmpty)
-              Container(
-                padding: const EdgeInsets.all(15),
-                margin: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: Colors.orange[100],
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: const Offset(0, 3), // changes position of shadow
-                    ),    
-                  ]
-                  
-                ),
-                child: Text(
-                resultText,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.center,
+        bottomNavigationBar: BottomAppBar(
+          color: const Color.fromARGB(255, 0, 0, 0), // Set the background color
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Distribute buttons evenly
+            children: [
+              // Home button
+              IconButton(
+                icon: const Icon(Icons.home, size: 40),
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MainPage()),
+                  );
+                },
               ),
+              // Settings button
+              IconButton(
+                icon: const Icon(Icons.settings, size: 40),
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SettingsPage()),
+                  );
+                },
               ),
-          ],
+            ],
+          ),
         ),
-      ),
-        
-        
-      bottomNavigationBar: BottomAppBar(
-        color: const Color.fromARGB(255, 0, 0, 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.home, size: 40),
-              color: Colors.white,
-              onPressed: () {
-                Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MainPage()),
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.settings, size: 40),
-              color: Colors.white,
-              onPressed: () {
-              Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+      );
+    },
   );
-  }
+}
 }

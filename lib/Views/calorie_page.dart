@@ -20,7 +20,7 @@ class _CaloriePageState extends State<CaloriePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return ChangeNotifierProvider( // Provide the CalorieCountProvider to this widget tree  
       create: (_) => CalorieCountProvider()..loadTargetsAsync()..loadTodayCalorieCountsAsync()..checkAndResetTargets(),
       child: Scaffold(
         appBar: AppBar(
@@ -38,6 +38,8 @@ class _CaloriePageState extends State<CaloriePage> {
             ],
           ),
         ),
+        // Use Consumer to listen to changes in CalorieCountProvider
+        // Save targets locally to be loaded when the page loads
         body: Consumer<CalorieCountProvider>(
           builder: (context, provider, child) {
             final dailyGoal = provider.dailyTarget;
@@ -179,6 +181,7 @@ class _CaloriePageState extends State<CaloriePage> {
                               setState(() {
                                 _selectedDate = selectedDate; 
                               });
+                              // Load calorie counts for the selected date
                               await Provider.of<CalorieCountProvider>(context, listen: false)
                                   .loadTodayCalorieCountsAsync(selectedDate: _selectedDate);
                             }
@@ -188,7 +191,7 @@ class _CaloriePageState extends State<CaloriePage> {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            provider.clearCalorieCountsAsync();
+                            provider.clearCalorieCountsAsync(); // Clear the calorie counts
                             debugPrint('Calorie counts cleared.');
                             Navigator.pushReplacement(
                               context,
@@ -261,6 +264,7 @@ class _CaloriePageState extends State<CaloriePage> {
             );
           },
         ),
+        // Bottom Navigation Bar
         bottomNavigationBar: BottomAppBar(
           color: Colors.black,
           child: Row(
@@ -304,6 +308,7 @@ class ExpandableTile extends StatefulWidget {
   _ExpandableTileState createState() => _ExpandableTileState();
 }
 
+// Builds the expandable tile with a ListTile and additional information
 class _ExpandableTileState extends State<ExpandableTile> {
   bool _isExpanded = false;
 
@@ -355,7 +360,7 @@ class _ExpandableTileState extends State<ExpandableTile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (widget.entry.name == "Exercise") ...[
+                  if (widget.entry.name == "Exercise") ...[ //Check if the entry is an exercise
                     _buildInfoRow('Date', '${widget.entry.date ?? 'Unknown Date'}/${widget.entry.month ?? 'Unknown Month'}'),
                     _buildInfoRow('Day of the Week', widget.entry.dayOfWeek ?? 'Unknown Day'),
                     _buildInfoRow('Activity Type', widget.entry.activityType ?? 'Unknown Activity'),
@@ -378,7 +383,7 @@ class _ExpandableTileState extends State<ExpandableTile> {
     );
   }
                 
-
+// Helper method to build the info row
 Widget _buildInfoRow(String label, String value) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 5.0),

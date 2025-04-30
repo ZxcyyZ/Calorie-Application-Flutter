@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-
 part 'products_model.g.dart'; // Required for code generation
 
 @JsonSerializable()

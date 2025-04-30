@@ -316,6 +316,8 @@ class NutritionPage extends StatelessWidget {
     );
   }
 
+  /// Helper method to build a row for nutritional information
+  /// Displays the label and value in a row format
   Widget _buildNutritionalInfoRow(String label, double? value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),

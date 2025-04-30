@@ -31,7 +31,7 @@ class _BarcodePageState extends State<BarcodePage> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiProvider( //Calls the providers
       providers: [
         ChangeNotifierProvider(create: (_) => CalorieCountProvider()),
         ChangeNotifierProvider(create: (_) => ProductApiProvider()),
@@ -70,6 +70,7 @@ class _BarcodePageState extends State<BarcodePage> {
           Expanded(
             child: ReaderWidget(
               onScan: (result) async {
+                const Duration(seconds: 10);
                 // Ignore duplicate scans within 5 seconds
                 if (result.text == lastDetectedBarcode &&
                     DateTime.now().difference(lastDetectedTime) <
@@ -172,6 +173,7 @@ class _BarcodePageState extends State<BarcodePage> {
           const SizedBox(height: 20),
         ],
       ),
+      // Bottom Navigation Bar
       bottomNavigationBar: BottomAppBar(
         color: Colors.black,
         child: Row(
@@ -257,16 +259,16 @@ void addCalories(BuildContext context, dynamic product, CalorieCountProvider cal
     protein: product.nutriments?.proteinsServe ?? 0.0,
     fat: product.nutriments?.fat ?? 0.0,
     satFat: product.nutriments?.saturatedFat ?? 0.0,  
-    month: DateTime.now().month, // Ensure this is an int
-    date: DateTime.now().day, // Ensure this is an int
-    dayOfWeek:  DateFormat('EEEE').format(DateTime.now()), // Updated to return the day name
-    weeklyTarget: newWeeklyTarget, // Already an int
-    dailyTarget: newDailyTarget, // Already an int
-    calorieTotals: newCalorieTotal, // This is a double, ensure the model accepts double
-    remainingCaloriesDaily: newRemainD, // This is a double, ensure the model accepts double
-    remainingCaloriesWeekly: newRemainW, // This is a double, ensure the model accepts double
-    progressDaily: newProgDay, // This is a double, ensure the model accepts double
-    progressWeekly: newProgWeek, // This is a double, ensure the model accepts double
+    month: DateTime.now().month, 
+    date: DateTime.now().day, 
+    dayOfWeek:  DateFormat('EEEE').format(DateTime.now()), 
+    weeklyTarget: newWeeklyTarget, 
+    dailyTarget: newDailyTarget, 
+    calorieTotals: newCalorieTotal, 
+    remainingCaloriesDaily: newRemainD, 
+    remainingCaloriesWeekly: newRemainW, 
+    progressDaily: newProgDay, 
+    progressWeekly: newProgWeek, 
   );
 
   // Save calorie data to the database

@@ -4,6 +4,8 @@ import 'package:firstflutterapp/Views/main_page.dart';
 import 'package:firstflutterapp/Views/settings_page.dart';
 import 'package:flutter/material.dart';
 
+/// The SetTargetPage class allows users to input their details (age, height, weight, and gender)
+/// to calculate their daily and weekly calorie targets and save them to the database.
 class SetTargetPage extends StatefulWidget {
   const SetTargetPage({super.key});
 
@@ -12,23 +14,22 @@ class SetTargetPage extends StatefulWidget {
 }
 
 class _SetTargetPageState extends State<SetTargetPage> {
+  // Controllers for user input fields
   final TextEditingController ageController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
   String selectedGender = 'Male'; // Default gender selection
 
-  // Save to database with daily and weekly remaining calories
+  /// Saves the calculated daily and weekly calorie targets to the database.
   Future<void> saveToDatabase(int dailyTarget, int weeklyTarget) async {
     try {
-      // Import the database service
-      final DatabaseService dbService = DatabaseService();
+      final DatabaseService dbService = DatabaseService(); // Database service instance
+      final now = DateTime.now(); // Current date and time
+      final dayOfWeek = now.weekday.toString(); // Current day of the week
 
-      final now = DateTime.now();
-      final dayOfWeek = now.weekday.toString();
-
-      // Save or update the calorie targets using the database service
+      // Save or update the calorie targets in the database
       await dbService.saveOrUpdateCalories(
-        name: 'Calorie Targets', // Name for the record
+        name: 'Calorie Targets', // Record name
         calories: 0, // No calories to save for targets
         caloriesTotals: 0,
         day: now.day,
@@ -36,40 +37,26 @@ class _SetTargetPageState extends State<SetTargetPage> {
         dayOfWeek: dayOfWeek,
         weeklyTarget: weeklyTarget,
         dailyTarget: dailyTarget,
-        remainingCaloriesDaily: dailyTarget.toDouble(), // Set daily remaining to match daily target
-        remainingCaloriesWeekly: weeklyTarget.toDouble(), // Set weekly remaining to match weekly target
+        remainingCaloriesDaily: dailyTarget.toDouble(), // Remaining daily calories
+        remainingCaloriesWeekly: weeklyTarget.toDouble(), // Remaining weekly calories
       );
 
-      // Debug lines to display the saved targets
+      // Debugging: Print saved targets to the console
       debugPrint('Daily Target Saved: $dailyTarget kcal');
       debugPrint('Weekly Target Saved: $weeklyTarget kcal');
-      debugPrint('Daily Remaining Saved: $dailyTarget kcal');
-      debugPrint('Weekly Remaining Saved: $weeklyTarget kcal');
-
-      final savedData = await dbService.getLatestDailyTarget(); // Replace with your actual database fetch method
-      final savedWeeklyData = await dbService.getLatestWeeklyTarget(); // Replace with your actual database fetch method
-
-      // Display the fetched data in the debug console
-      if (savedData != null) {
-        debugPrint('Fetched Data from Database:');
-        debugPrint('Daily Target: ${savedData} kcal');
-        debugPrint('Weekly Target: ${savedWeeklyData} kcal');
-      } else {
-        debugPrint('No data found in the database.');
-      }
-
-      debugPrint('Saved successfully to the database!');
     } catch (e) {
+      // Handle errors during database save
       debugPrint('Error saving to the database: $e');
     }
   }
 
+  /// Validates user input, calculates calorie targets, and saves them to the database.
   void calculateCalorieTarget() async {
     final ageText = ageController.text;
     final heightText = heightController.text;
     final weightText = weightController.text;
 
-    // Validate inputs
+    // Validate that all fields are filled
     if (ageText.isEmpty || heightText.isEmpty || weightText.isEmpty) {
       showDialog(
         context: context,
@@ -87,11 +74,13 @@ class _SetTargetPageState extends State<SetTargetPage> {
       return;
     }
 
+    // Parse user input
     final age = int.tryParse(ageText);
     final height = double.tryParse(heightText);
     final weight = double.tryParse(weightText);
 
-    if (age == null || height == null || weight == null) {
+    // Validate that inputs are numeric and greater than zero
+    if (age == null || height == null || weight == null || age <= 0 || height <= 0 || weight <= 0) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -108,24 +97,7 @@ class _SetTargetPageState extends State<SetTargetPage> {
       return;
     }
 
-    if (age <= 0 || height <= 0 || weight <= 0) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text('Age, height, and weight must be greater than zero.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
-    // Calculate BMR using the provided formulas
+    // Calculate BMR (Basal Metabolic Rate) based on gender
     double bmr;
     if (selectedGender == 'Male') {
       bmr = 66.5 + (13.75 * weight) + (5.003 * height) - (6.75 * age);
@@ -133,13 +105,14 @@ class _SetTargetPageState extends State<SetTargetPage> {
       bmr = 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
     }
 
+    // Calculate daily and weekly calorie targets
     final dailyTarget = (bmr * 1.2).round(); // Assuming sedentary activity level
     final weeklyTarget = dailyTarget * 7;
 
     // Save the targets to the database
     await saveToDatabase(dailyTarget, weeklyTarget);
 
-    // Show success dialog
+    // Show success dialog with calculated targets
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -176,6 +149,7 @@ class _SetTargetPageState extends State<SetTargetPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Instruction Text
               const Text(
                 'Enter your details below to calculate your daily and weekly calorie targets.',
                 textAlign: TextAlign.center,
@@ -264,12 +238,13 @@ class _SetTargetPageState extends State<SetTargetPage> {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                  calculateCalorieTarget();
-                  
-                  Navigator.pushReplacement(
+                    calculateCalorieTarget();
+
+                    // Navigate to the CaloriePage after calculation
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => const CaloriePage()),
-                  );
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
@@ -297,8 +272,8 @@ class _SetTargetPageState extends State<SetTargetPage> {
               color: Colors.white,
               onPressed: () {
                 Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MainPage()),
+                  context,
+                  MaterialPageRoute(builder: (context) => const MainPage()),
                 );
               },
             ),
@@ -307,10 +282,10 @@ class _SetTargetPageState extends State<SetTargetPage> {
               icon: const Icon(Icons.settings, size: 40),
               color: Colors.white,
               onPressed: () {
-               Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const SettingsPage()),
-               );
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+                );
               },
             ),
           ],
