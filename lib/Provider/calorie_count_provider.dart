@@ -33,22 +33,30 @@ class CalorieCountProvider extends ChangeNotifier {
  Future<void> loadTodayCalorieCountsAsync({DateTime? selectedDate}) async {
   try {
     // Fetch all matching calorie counts from the database
-    final todayCalorieCounts = await DatabaseService().getCalorieCounts();
+    final todayCalorieCounts = await DatabaseService().getCalorieCounts(selectedDate: selectedDate) ?? [];
+    // Debug: Print the fetched calorie counts
+
+    debugPrint('Fetched calorie counts: ${todayCalorieCounts}'); // Debug line
 
     if (todayCalorieCounts != null && todayCalorieCounts.isNotEmpty) {
       final targetDate = selectedDate ?? DateTime.now();
+
+      debugPrint('Target date for calorie counts: $targetDate'); // Debug line
 
       // Save all fetched data directly
       _todayCalorieCounts = todayCalorieCounts
           .where((entry) => 
               entry.name != 'Calorie Targets' && // Adjust the condition as needed
-              entry.date == targetDate.day && entry.month == targetDate.month)
+              entry.date == targetDate.day && 
+              entry.month == targetDate.month) // Ensure the year also matches
           .toList()
           .reversed
           .toList();
+
+          debugPrint('Filtered calorie records: ${_todayCalorieCounts.length}'); // Debug line
       // Debug: Print each calorie count in the list
       for (var item in _todayCalorieCounts) {
-        debugPrint('Stored calorie record: ${item.toString()}');
+        debugPrint('Stored calorie record: ${item.name}');
       }
     } else {
       // If no data is found, reset the values

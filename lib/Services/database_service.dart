@@ -89,15 +89,14 @@ class DatabaseService {
     );
   }
 
-  Future<List<CalorieCount>> getCalorieCounts() async {
+  Future<List<CalorieCount>> getCalorieCounts({DateTime? selectedDate}) async {
     final db = await database;
-    final today = DateTime.now();
-
+    final targetDate = selectedDate ?? DateTime.now();
     // Query the database for all records matching today's date and month
     final results = await db.query(
       'CalorieCount',
       where: 'date = ? AND month = ?',
-      whereArgs: [today.day, today.month],
+      whereArgs: [targetDate.day, targetDate.month],
     );
 
     // Map all results to a list of CalorieCount objects
